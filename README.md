@@ -1,1 +1,2 @@
-# 2025_SEASONTHON_TEAM_13_BE
+# EmotionMusic-BE
+이음프로젝트 백엔드 레포

@@ -1,0 +1,66 @@
+name: Deploy Docker Image to AWS EC2 (Git Pull & Stabilized)
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  PROJECT_PATH: ~/emotion-music-api
+  # ✅ IMPORTANT: Replace with your actual GitHub username and repo name
+  GIT_SSH_URL: git@github.com:hsx0306/EmotionMusic-BE.git
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: env
+
+    steps:
+      - name: Deploy on EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PEM_KEY }}
+          timeout: 1800s
+          script: |
+            # 1. Pre-cleanup: Stop any lingering docker processes from previous failed runs
+            if [ -d "${{ env.PROJECT_PATH }}" ]; then
+              cd ${{ env.PROJECT_PATH }}
+              docker compose down
+            fi
+
+            # 2. Setup SSH Deploy Key
+            echo "${{ secrets.EC2_DEPLOY_KEY }}" > ~/.ssh/deploy_key
+            chmod 600 ~/.ssh/deploy_key
+            eval "$(ssh-agent -s)"
+            ssh-add ~/.ssh/deploy_key
+            
+            # Add GitHub's public key to known_hosts to prevent interactive prompts
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+            # 3. Clone or Pull the latest code
+            # If the project folder doesn't exist, clone it using the SSH URL
+            if [ ! -d "${{ env.PROJECT_PATH }}" ]; then
+              git clone ${{ env.GIT_SSH_URL }} ${{ env.PROJECT_PATH }}
+            fi
+            
+            cd ${{ env.PROJECT_PATH }}
+            
+            # ✅ THE FIX: Force git to use the correct SSH URL before pulling
+            git remote set-url origin ${{ env.GIT_SSH_URL }}
+            
+            # Now, pull the latest changes
+            git pull origin master
+            
+            # 4. Create .env file
+            cat << EOF > .env
+            SWAGGER_USER_USERNAME=${{ secrets.SWAGGER_USER_USERNAME }}
+            SWAGGER_USER_PASSWORD=${{ secrets.SWAGGER_USER_PASSWORD }}
+            EOF
+            
+            # 5. Build and Deploy with Docker Compose
+            docker compose up --build -d --force-recreate
+            
+            # 6. Final Cleanup
+            docker system prune -af
