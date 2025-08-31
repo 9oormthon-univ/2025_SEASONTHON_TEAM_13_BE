@@ -25,8 +25,8 @@ services:
       - .env
 
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      -
+      SPRING_PROFILES_ACTIVE: prod
+
     volumes:
       - gradle-cache:/root/.gradle
 
