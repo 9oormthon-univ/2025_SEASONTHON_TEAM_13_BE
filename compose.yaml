@@ -23,6 +23,10 @@ services:
     #    .env 파일을 읽어 컨테이너에 환경 변수를 주입하도록 설정합니다.
     env_file:
       - .env
+
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      -
     volumes:
       - gradle-cache:/root/.gradle
 
