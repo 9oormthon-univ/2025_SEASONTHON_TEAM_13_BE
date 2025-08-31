@@ -1,6 +1,7 @@
 package cloud.emusic.emotionmusicapi.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter
 @Table(name = "post")
-@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
     @Id
