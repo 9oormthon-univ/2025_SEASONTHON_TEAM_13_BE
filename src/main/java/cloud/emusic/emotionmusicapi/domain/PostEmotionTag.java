@@ -1,6 +1,7 @@
 package cloud.emusic.emotionmusicapi.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
         name = "post_emotion_tag",
         uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "emotion_tag_id"}) // 중복 방지
 )
-@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostEmotionTag {
 
     @Id
