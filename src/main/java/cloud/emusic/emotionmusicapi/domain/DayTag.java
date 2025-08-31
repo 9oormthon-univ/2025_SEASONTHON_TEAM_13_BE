@@ -23,6 +23,10 @@ public class DayTag {
     @Column(nullable = false,length = 500)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

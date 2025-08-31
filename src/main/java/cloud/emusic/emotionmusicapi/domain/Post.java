@@ -25,9 +25,6 @@ public class Post {
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DayTag> dayTags = new ArrayList<>();
-
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEmotionTag> emotionTags = new ArrayList<>();
 
     @CreationTimestamp
