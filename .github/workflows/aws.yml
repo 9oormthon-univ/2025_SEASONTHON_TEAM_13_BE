@@ -59,6 +59,9 @@ jobs:
             SWAGGER_USER_PASSWORD=${{ secrets.SWAGGER_USER_PASSWORD }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}
+            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
             EOF
             
             # 5. Build and Deploy with Docker Compose
