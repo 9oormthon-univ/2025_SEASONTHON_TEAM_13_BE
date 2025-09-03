@@ -1,41 +1,40 @@
 package cloud.emusic.emotionmusicapi.controller;
+import cloud.emusic.emotionmusicapi.config.JwtTokenProvider;
+import cloud.emusic.emotionmusicapi.domain.User;
 import cloud.emusic.emotionmusicapi.dto.request.LoginRequest;
 import cloud.emusic.emotionmusicapi.dto.response.KakaoTokenResponse;
 import cloud.emusic.emotionmusicapi.dto.response.KakaoUserResponse;
+import cloud.emusic.emotionmusicapi.dto.response.LoginResponse;
+import cloud.emusic.emotionmusicapi.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/login")
+@RequiredArgsConstructor
 public class LoginController {
 
-  // 1. final 키워드를 사용해 불변 필드(멤버 변수)로 선언합니다.
-  private final String kakaoRestApiKey;
-  private final String kakaoRedirectUri;
-  private final String kakaoClientSecret;
+  private final UserService userService;
+  private final JwtTokenProvider jwtTokenProvider;
 
+  @Value("${KAKAO_REST_API_KEY}")
+  private String kakaoRestApiKey;
 
-  // 2. 생성자를 만들어 @Value 어노테이션으로 값을 주입받습니다. (✅ 권장 방식)
-  // Spring이 LoginController Bean을 생성할 때 이 생성자를 호출하여 값을 넣어줍니다.
-  public LoginController(
-      @Value("${KAKAO_REST_API_KEY}") String kakaoRestApiKey,
-      @Value("${KAKAO_REDIRECT_URI}") String kakaoRedirectUri,
-      @Value("${KAKAO_CLIENT_SECRET}") String kakaoClientSecret) {
-    this.kakaoRestApiKey = kakaoRestApiKey;
-    this.kakaoRedirectUri = kakaoRedirectUri;
-    this.kakaoClientSecret = kakaoClientSecret;
-  }
+  @Value("${KAKAO_REDIRECT_URI}")
+  private String kakaoRedirectUri;
+
+  @Value("${KAKAO_CLIENT_SECRET}")
+  private String kakaoClientSecret;
+
 
   @GetMapping("/url")
   public String getLoginUrl() {
-    // 실제 로그인 URL을 반환하는 로직
     return "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" +
         this.kakaoRestApiKey +
         "&redirect_uri=" +
@@ -44,44 +43,55 @@ public class LoginController {
   }
 
   @GetMapping("/authenticate")
-  public KakaoUserResponse authenticate(@ParameterObject LoginRequest request) {
+  public LoginResponse authenticate(@ParameterObject LoginRequest request) {
 
+    // 1. Get Access Token from Kakao
+    KakaoTokenResponse tokenResponse = getKakaoToken(request.getCode());
+
+    // 2. Get User Info from Kakao
+    KakaoUserResponse userResponse = getKakaoUser(tokenResponse.getAccessToken());
+
+    // 3. Process User: Save or Update user in DB
+    User user = userService.processKakaoUser(userResponse);
+
+    // 4. Generate JWT Token
+    String accessToken = jwtTokenProvider.generateToken(user);
+
+    // 5. Return JWT Token in Response
+    return LoginResponse.builder()
+        .grantType("Bearer")
+        .accessToken(accessToken)
+        .build();
+  }
+
+  private KakaoTokenResponse getKakaoToken(String code) {
     WebClient webClient = WebClient.builder()
         .baseUrl("https://kauth.kakao.com")
         .build();
 
-    // 1. 액세스 토큰 요청
-    KakaoTokenResponse tokenResponse =
-        webClient.post()
-            .uri("/oauth/token")
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .bodyValue("grant_type=authorization_code"
-                + "&client_id=" + kakaoRestApiKey
-                + "&client_secret=" + kakaoClientSecret
-                + "&redirect_uri=" + kakaoRedirectUri
-                + "&code=" + request.getCode())
-            .retrieve()
-            .bodyToMono(KakaoTokenResponse.class)
-            .block();  // 동기적으로 결과 받기
+    return webClient.post()
+        .uri("/oauth/token")
+        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+        .bodyValue("grant_type=authorization_code"
+            + "&client_id=" + kakaoRestApiKey
+            + "&client_secret=" + kakaoClientSecret
+            + "&redirect_uri=" + kakaoRedirectUri
+            + "&code=" + code)
+        .retrieve()
+        .bodyToMono(KakaoTokenResponse.class)
+        .block();
+  }
 
-    // 2. 유저 정보 요청
+  private KakaoUserResponse getKakaoUser(String accessToken) {
     WebClient apiClient = WebClient.builder()
         .baseUrl("https://kapi.kakao.com")
         .build();
 
-    KakaoUserResponse userResponse =
-        apiClient.get()
-            .uri("/v2/user/me")
-            .header("Authorization", "Bearer " + tokenResponse.getAccessToken())
-            .retrieve()
-            .bodyToMono(KakaoUserResponse.class)
-            .block();  // 동기적으로 결과 받기
-
-    return userResponse;  // JSON 형태로 임시반환.
-
-    //추가적인 JWT 발행 요망
+    return apiClient.get()
+        .uri("/v2/user/me")
+        .header("Authorization", "Bearer " + accessToken)
+        .retrieve()
+        .bodyToMono(KakaoUserResponse.class)
+        .block();
   }
-
-
 }
-
