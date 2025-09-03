@@ -1,48 +1,68 @@
 package cloud.emusic.emotionmusicapi.config;
 
+import cloud.emusic.emotionmusicapi.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
 import java.util.Arrays;
-
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 1. 클래스에 있던 @Value 필드들을 삭제합니다.
-    // @Value("${swagger.user.username}")
-    // private String swaggerUsername;
-    // @Value("${swagger.user.password}")
-    // private String swaggerPassword;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider,userRepository);
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // CORS 설정 활성화 (corsConfigurationSource()의 설정 사용)
                 .cors(withDefaults())
+
+                // CSRF 보안 비활성화 (JWT는 세션이 없으므로 CSRF 불필요)
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
+
+                // 세션을 사용하지 않도록 설정 (JWT 기반 인증이라 Stateless)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 요청 URL별 권한 규칙 설정
+                .authorizeHttpRequests(auth -> auth
+                        // Swagger 관련 URL은 SWAGGER 역할이 있는 사용자만 접근 가능
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
-                        ).authenticated()
+                        ).hasRole("SWAGGER")
+                        // 로그인(JWT 인증)된 사용자만 접근 가능
+                        .requestMatchers("/posts/**").authenticated()
+                        // 그 외 모든 요청은 허용 (permitAll)
                         .anyRequest().permitAll()
                 )
-                .httpBasic(withDefaults());
+                // Swagger 접근은 HTTP Basic 인증 사용
+                .httpBasic(withDefaults())
+                // UsernamePasswordAuthenticationFilter 실행 전에 JwtAuthenticationFilter 실행
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -71,7 +91,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정을 적용
         return source;
     }
-
 
     @Bean
     public UserDetailsService userDetailsService(
