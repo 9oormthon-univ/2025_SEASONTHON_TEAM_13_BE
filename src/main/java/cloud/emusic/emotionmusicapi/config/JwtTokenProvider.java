@@ -6,8 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.util.Date;
 
 @Component
@@ -19,7 +19,7 @@ public class JwtTokenProvider {
     private static final long JWT_EXPIRATION_TIME = 1000L * 60 * 60 * 24; // 24 hours
 
     // Key 객체로 변환한 서명용 비밀 키
-    private Key key;
+    private SecretKey key;
 
     // 빈 초기화 시점에 Key 객체 생성
     @PostConstruct
@@ -68,10 +68,10 @@ public class JwtTokenProvider {
 
     // Claims 추출 (토큰 내부 정보 파싱)
     private Claims parseClaims(String token) {
-      return Jwts.parserBuilder()
-              .setSigningKey(key)
-              .build()
-              .parseClaimsJws(token)
-              .getBody();
+        return Jwts.parser()                 // parserBuilder() 대신 parser()
+                .verifyWith(key)             // 검증용 키 지정
+                .build()
+                .parseSignedClaims(token)    // parseClaimsJws() → parseSignedClaims()
+                .getPayload();
     }
 }
