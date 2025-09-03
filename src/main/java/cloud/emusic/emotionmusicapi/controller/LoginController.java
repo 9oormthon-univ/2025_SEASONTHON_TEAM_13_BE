@@ -1,4 +1,5 @@
 package cloud.emusic.emotionmusicapi.controller;
+
 import cloud.emusic.emotionmusicapi.config.JwtTokenProvider;
 import cloud.emusic.emotionmusicapi.domain.User;
 import cloud.emusic.emotionmusicapi.dto.request.LoginRequest;
@@ -55,7 +56,7 @@ public class LoginController {
     User user = userService.processKakaoUser(userResponse);
 
     // 4. Generate JWT Token
-    String accessToken = jwtTokenProvider.generateToken(user);
+    String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
 
     // 5. Return JWT Token in Response
     return LoginResponse.builder()
