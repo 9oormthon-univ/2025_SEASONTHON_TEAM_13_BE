@@ -49,4 +49,11 @@ public class User {
         this.role = role;
         this.profileImage = profileImage;
     }
+
+    // Method to update user's profile information
+    public User updateProfile(String nickname, String profileImage) {
+        this.nickname = nickname;
+        this.profileImage = profileImage;
+        return this;
+    }
 }
