@@ -25,9 +25,11 @@ public class SwaggerConfig {
         Components components = new Components()
                 .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
                         .name(jwtSchemeName)
-                        .type(SecurityScheme.Type.HTTP) // HTTP 방식
-                        .scheme("bearer") // bearer 토큰 방식
-                        .bearerFormat("JWT")); // JWT 형식
+                        .type(SecurityScheme.Type.HTTP)   // HTTP 인증 방식
+                        .scheme("bearer")                 // Bearer 인증
+                        .bearerFormat("JWT")              // JWT 포맷
+                        .in(SecurityScheme.In.HEADER));
+
 
         return new OpenAPI()
                 .info(info)
