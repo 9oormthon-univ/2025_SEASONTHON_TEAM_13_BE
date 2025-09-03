@@ -75,7 +75,8 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080", // 로컬 테스트 환경 (React 기본 포트)
                 "https://emusic.cloud",     // 배포 환경
-                "https://api.emusic.cloud" // API 서버 도메인
+                "https://api.emusic.cloud", // API 서버 도메인
+                "http://localhost:5173"
         ));
 
         // 3. 허용할 HTTP 메서드를 지정합니다. (*는 모든 메서드를 의미)
