@@ -3,6 +3,7 @@ package cloud.emusic.emotionmusicapi.service;
 import cloud.emusic.emotionmusicapi.domain.PostLike;
 import cloud.emusic.emotionmusicapi.domain.Post;
 import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.LikeRepository;
@@ -11,6 +12,9 @@ import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,5 +51,20 @@ public class LikeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
 
         likeRepository.delete(like);
+    }
+
+    public List<PostResponseDto> getLikedPosts(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<PostLike> likes = likeRepository.findAllByUser(user);
+
+        return likes.stream()
+                .map(like ->
+                        {
+                            long likeCount = likeRepository.countByPost(like.getPost());
+                            return PostResponseDto.from(like.getPost(),likeCount);
+                        })
+                .collect(Collectors.toList());
     }
 }
