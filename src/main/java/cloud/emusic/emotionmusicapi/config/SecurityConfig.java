@@ -39,6 +39,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain swaggerSecurity(HttpSecurity http) throws Exception {
         http.cors(withDefaults())
+                .securityMatcher("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Swagger 관련 URL은 SWAGGER 역할이 있는 사용자만 접근 가능
@@ -57,10 +58,12 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
         http.cors(withDefaults())
+                .securityMatcher("/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/posts/**").authenticated()
+                        .requestMatchers("/login/url","login/authenticate").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
