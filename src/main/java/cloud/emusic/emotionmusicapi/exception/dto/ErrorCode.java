@@ -14,8 +14,13 @@ public enum ErrorCode {
 
     // 게시글
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
-    POST_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 게시글에 접근할 권한이 없습니다.");
+    POST_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 게시글에 접근할 권한이 없습니다."),
 
+    // 유저
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+
+    // 감정 태그
+    EMOTION_TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "감정 태그를 찾을 수 없습니다.");
     private final HttpStatus status;
     private final String message;
 }

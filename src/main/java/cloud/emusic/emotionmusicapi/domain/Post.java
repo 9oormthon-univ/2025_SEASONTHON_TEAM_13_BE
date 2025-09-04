@@ -28,9 +28,29 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostEmotionTag> emotionTags = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DayTag> dayTags = new ArrayList<>();
+
+    @Column(name = "song_track_id", nullable = false, length = 100)
+    private String songTrackId;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Post(User user,String trackId) {
+        this.user = user;
+        this.songTrackId = trackId;
+    }
+
+    public void addEmotionTag(PostEmotionTag tag) {
+        this.emotionTags.add(tag);
+    }
+
+    public void addDayTag(DayTag dayTag) {
+        dayTags.add(dayTag);
+    }
+
 }

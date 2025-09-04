@@ -26,4 +26,9 @@ public class PostEmotionTag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emotion_tag_id", nullable = false)
     private EmotionTag emotionTag;
+
+    public PostEmotionTag(Post post, EmotionTag emotionTag) {
+        this.post = post;
+        this.emotionTag = emotionTag;
+    }
 }

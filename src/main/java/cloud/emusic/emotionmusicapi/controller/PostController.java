@@ -1,6 +1,8 @@
 package cloud.emusic.emotionmusicapi.controller;
 
 import cloud.emusic.emotionmusicapi.dto.request.EmotionTagResponse;
+import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
+import cloud.emusic.emotionmusicapi.dto.request.PostCreateResponse;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,12 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
@@ -45,4 +47,25 @@ public class PostController {
         return ResponseEntity.ok(postService.EmotionTag());
     }
 
+    @Operation(summary = "게시글 작성", description = "JWT 인증된 사용자가 게시글을 작성합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "게시글 작성 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostCreateResponse.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "인증 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    @PostMapping
+    public ResponseEntity<PostCreateResponse> create(
+            @Valid @RequestBody PostCreateRequest request,
+            @AuthenticationPrincipal(expression = "id") Long userId) {
+        return ResponseEntity.status(201).body(postService.createPost(userId, request));
+    }
 }
