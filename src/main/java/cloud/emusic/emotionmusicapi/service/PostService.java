@@ -139,4 +139,20 @@ public class PostService {
 
         return PostResponseDto.from(post, likeCount,isLiked,commentCount);
     }
+
+    @Transactional
+    public void deletePost(Long postId,Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new CustomException(INVALID_PERMISSION);
+        }
+
+        // 연관된 댓글과 좋아요 먼저 삭제
+        commentRepository.deleteByPost(post);
+        likeRepository.deleteByPost(post);
+
+        postRepository.delete(post);
+    }
 }
