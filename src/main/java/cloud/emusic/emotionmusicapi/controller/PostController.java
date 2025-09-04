@@ -79,7 +79,23 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts(@AuthenticationPrincipal(expression = "id") Long userId) {
+    public ResponseEntity<List<PostResponseDto>> getAllPosts() {
         return ResponseEntity.ok(postService.getAllPosts());
+    }
+
+    @Operation(summary = "게시글 단건 조회", description = "게시글 ID를 사용하여 특정 게시글을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> getPostById(
+            @PathVariable Long postId) {
+        return ResponseEntity.ok(postService.getPost(postId));
     }
 }

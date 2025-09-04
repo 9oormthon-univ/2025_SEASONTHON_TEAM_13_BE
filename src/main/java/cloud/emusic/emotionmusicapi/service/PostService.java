@@ -13,8 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.EMOTION_TAG_NOT_FOUND;
-import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.USER_NOT_FOUND;
+
+import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,24 +59,35 @@ public class PostService {
 
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAll().stream()
-                .map(post -> PostResponseDto.builder()
-                        .id(post.getId())
-                        .emotionTags(
-                                post.getEmotionTags().stream()
-                                        .map(et -> et.getEmotionTag().getName())
-                                        .toList()
-                        )
-                        .dailyTags(
-                                post.getDayTags().stream()
-                                        .map(DayTag::getName)
-                                        .toList()
-                        )
-                        .trackId(post.getSongTrackId())
-                        .user(post.getUser().getNickname())
-                        .createdAt(post.getCreatedAt())
-                        .updatedAt(post.getUpdatedAt())
-                        .build()
+                .map(this::getResponseDto
                 )
                 .toList();
+    }
+
+    public PostResponseDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+
+        return getResponseDto(post);
+    }
+
+    private PostResponseDto getResponseDto(Post post) {
+        return PostResponseDto.builder()
+                .id(post.getId())
+                .emotionTags(
+                        post.getEmotionTags().stream()
+                                .map(et -> et.getEmotionTag().getName())
+                                .toList()
+                )
+                .dailyTags(
+                        post.getDayTags().stream()
+                                .map(DayTag::getName)
+                                .toList()
+                )
+                .trackId(post.getSongTrackId())
+                .user(post.getUser().getNickname())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .build();
     }
 }
