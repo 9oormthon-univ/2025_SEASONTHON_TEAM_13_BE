@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -35,18 +36,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // CORS 설정 활성화 (corsConfigurationSource()의 설정 사용)
-                .cors(withDefaults())
-
-                // CSRF 보안 비활성화 (JWT는 세션이 없으므로 CSRF 불필요)
+    @Order(1)
+    public SecurityFilterChain swaggerSecurity(HttpSecurity http) throws Exception {
+        http.cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // 세션을 사용하지 않도록 설정 (JWT 기반 인증이라 Stateless)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 요청 URL별 권한 규칙 설정
                 .authorizeHttpRequests(auth -> auth
                         // Swagger 관련 URL은 SWAGGER 역할이 있는 사용자만 접근 가능
                         .requestMatchers(
@@ -55,15 +48,23 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).hasRole("SWAGGER")
                         // 로그인(JWT 인증)된 사용자만 접근 가능
-                        .requestMatchers("/posts/**").authenticated()
-                        // 그 외 모든 요청은 허용 (permitAll)
                         .anyRequest().permitAll()
                 )
-                // Swagger 접근은 HTTP Basic 인증 사용
-                .httpBasic(withDefaults())
-                // UsernamePasswordAuthenticationFilter 실행 전에 JwtAuthenticationFilter 실행
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .httpBasic(withDefaults());
+        return http.build();
+    }
 
+    @Bean
+    @Order(2)
+    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+        http.cors(withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/posts/**").authenticated()
+                        .anyRequest().permitAll()
+                )
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

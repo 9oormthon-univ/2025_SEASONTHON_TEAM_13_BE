@@ -32,4 +32,11 @@ public class DayTag {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public static DayTag create(String name,Post post) {
+        DayTag tag = new DayTag();
+        tag.name = name;
+        tag.post = post;
+        return tag;
+    }
 }
