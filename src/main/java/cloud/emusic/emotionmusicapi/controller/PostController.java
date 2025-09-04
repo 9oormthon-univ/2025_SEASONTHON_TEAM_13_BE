@@ -7,6 +7,7 @@ import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -79,8 +80,20 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts(@AuthenticationPrincipal(expression = "id") Long userId) {
-        return ResponseEntity.ok(postService.getAllPosts(userId));
+    public ResponseEntity<List<PostResponseDto>> getAllPosts(
+            @AuthenticationPrincipal(expression = "id") Long userId,
+            @Parameter(description = "정렬 기준 (예: createdAt, likeCount)")
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+
+            @Parameter(description = "정렬 방식 (asc 또는 desc)")
+            @RequestParam(defaultValue = "desc") String direction,
+
+            @Parameter(description = "조회할 페이지 번호 (0부터 시작)")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "조회할 페이지 크기")
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(postService.getAllPosts(userId,sortBy,direction,page,size));
     }
 
     @Operation(summary = "게시글 단건 조회", description = "게시글 ID를 사용하여 특정 게시글을 조회합니다.")

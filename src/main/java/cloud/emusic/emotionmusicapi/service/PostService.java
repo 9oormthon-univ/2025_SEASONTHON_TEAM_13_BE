@@ -9,6 +9,9 @@ import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -61,16 +64,36 @@ public class PostService {
         return new PostCreateResponse(post.getId());
     }
 
-    public List<PostResponseDto> getAllPosts(Long userId) {
+    public List<PostResponseDto> getAllPosts(Long userId,String sortBy,String direction,int page,int size) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        return postRepository.findAll().stream()
-                .map(post -> {
-                            return getPostResponse(post,user);
-                })
-                .toList();
+        if (sortBy.equals("likeCount")) {
+            return postRepository.findPostsOrderByLikeCount(size, page * size).stream()
+                .map(result -> {
+                    Long postId = ((Number) result[0]).longValue();
+                    Post post = postRepository.findById(postId)
+                            .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+
+                    Long likeCount = ((Number) result[result.length - 1]).longValue(); // 마지막 컬럼이 like_count
+                    Long commentCount = commentRepository.countByPost(post);
+                    boolean isLiked = likeRepository.existsByPostAndUser(post, user);
+
+                    return PostResponseDto.from(post, likeCount, isLiked, commentCount);
+                }).toList();
+        }
+        else {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
+            return postRepository.findAll(pageable).stream()
+                    .map(post -> {
+                        long likeCount = likeRepository.countByPost(post);
+                        long commentCount = commentRepository.countByPost(post);
+                        boolean isLiked = likeRepository.existsByPostAndUser(post, user);
+                        return PostResponseDto.from(post, likeCount, isLiked, commentCount);
+                    })
+                    .toList();
+        }
     }
 
     public PostResponseDto getPost(Long postId,Long userId) {
