@@ -53,4 +53,16 @@ public class Post {
         dayTags.add(dayTag);
     }
 
+    public void removeEmotionTag(String tagName) {
+        this.emotionTags.removeIf(et -> et.getEmotionTag().getName().equals(tagName));
+    }
+
+    public void removeDayTag(String tagName) {
+        this.dayTags.removeIf(dt -> dt.getName().equals(tagName));
+    }
+
+    public void updateSongTrackId(String songTrackId) {
+        this.songTrackId = songTrackId;
+    }
+
 }

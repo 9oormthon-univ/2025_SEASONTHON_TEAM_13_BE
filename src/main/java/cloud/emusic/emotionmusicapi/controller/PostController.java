@@ -98,4 +98,25 @@ public class PostController {
             @PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPost(postId));
     }
+
+    @Operation(summary = "게시글 수정", description = "게시글 ID를 사용하여 특정 게시글을 수정합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 수정 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponseDto> updatePost(
+            @PathVariable Long postId,
+            @RequestBody PostCreateRequest requestDto,
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        return ResponseEntity.ok(postService.updatePost(postId, requestDto, userId));
+    }
 }
