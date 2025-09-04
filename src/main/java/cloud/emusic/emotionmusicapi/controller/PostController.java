@@ -1,8 +1,9 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.request.EmotionTagResponse;
+import cloud.emusic.emotionmusicapi.dto.response.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
-import cloud.emusic.emotionmusicapi.dto.request.PostCreateResponse;
+import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
+import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,5 +68,18 @@ public class PostController {
             @Valid @RequestBody PostCreateRequest request,
             @AuthenticationPrincipal(expression = "id") Long userId) {
         return ResponseEntity.status(201).body(postService.createPost(userId, request));
+    }
+
+    @Operation(summary = "게시글 목록 조회", description = "모든 게시글을 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponseDto.class)))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping
+    public ResponseEntity<List<PostResponseDto>> getAllPosts(@AuthenticationPrincipal(expression = "id") Long userId) {
+        return ResponseEntity.ok(postService.getAllPosts());
     }
 }

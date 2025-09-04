@@ -1,9 +1,10 @@
 package cloud.emusic.emotionmusicapi.service;
 
 import cloud.emusic.emotionmusicapi.domain.*;
-import cloud.emusic.emotionmusicapi.dto.request.EmotionTagResponse;
+import cloud.emusic.emotionmusicapi.dto.response.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
-import cloud.emusic.emotionmusicapi.dto.request.PostCreateResponse;
+import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
+import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.EmotionTagRepository;
 import cloud.emusic.emotionmusicapi.repository.PostRepository;
@@ -54,5 +55,28 @@ public class PostService {
         postRepository.save(post);
 
         return new PostCreateResponse(post.getId());
+    }
+
+    public List<PostResponseDto> getAllPosts() {
+        return postRepository.findAll().stream()
+                .map(post -> PostResponseDto.builder()
+                        .id(post.getId())
+                        .emotionTags(
+                                post.getEmotionTags().stream()
+                                        .map(et -> et.getEmotionTag().getName())
+                                        .toList()
+                        )
+                        .dailyTags(
+                                post.getDayTags().stream()
+                                        .map(DayTag::getName)
+                                        .toList()
+                        )
+                        .trackId(post.getSongTrackId())
+                        .user(post.getUser().getNickname())
+                        .createdAt(post.getCreatedAt())
+                        .updatedAt(post.getUpdatedAt())
+                        .build()
+                )
+                .toList();
     }
 }
