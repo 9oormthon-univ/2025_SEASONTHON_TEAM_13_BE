@@ -14,7 +14,12 @@ public enum ErrorCode {
 
     // 게시글
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
-    POST_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 게시글에 접근할 권한이 없습니다.");
+    POST_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 게시글에 접근할 권한이 없습니다."),
+
+    // 댓글 (추가된 부분)
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
+    COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 댓글에 접근할 권한이 없습니다.");
+
 
     private final HttpStatus status;
     private final String message;
