@@ -138,4 +138,21 @@ public class PostController {
         postService.deletePost(postId, userId);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "감정 캘린더 조회", description = "로그인한 사용자가 작성한 게시글을 날짜별로 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/calendar")
+    public ResponseEntity<List<PostResponseDto>> getMyEmotionCalendar(
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        return ResponseEntity.ok(postService.getPostCalendar(userId));
+    }
 }

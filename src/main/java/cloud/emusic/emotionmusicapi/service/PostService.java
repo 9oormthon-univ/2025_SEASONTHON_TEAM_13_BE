@@ -155,4 +155,18 @@ public class PostService {
 
         postRepository.delete(post);
     }
+
+    public List<PostResponseDto> getPostCalendar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        return postRepository.findAllByUser(user).stream()
+                .map(post -> {
+                    long likeCount = likeRepository.countByPost(post);
+                    long commentCount = commentRepository.countByPost(post);
+                    boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
+                    return PostResponseDto.from(post,likeCount,isLiked,commentCount);
+                })
+                .toList();
+    }
 }
