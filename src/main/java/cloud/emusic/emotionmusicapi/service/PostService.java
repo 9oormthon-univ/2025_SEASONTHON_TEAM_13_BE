@@ -7,6 +7,7 @@ import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
 import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.EmotionTagRepository;
+import cloud.emusic.emotionmusicapi.repository.LikeRepository;
 import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -20,6 +21,7 @@ import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.*;
 @RequiredArgsConstructor
 public class PostService {
 
+    private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final EmotionTagRepository emotionTagRepository;
@@ -59,8 +61,10 @@ public class PostService {
 
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAll().stream()
-                .map(this::getResponseDto
-                )
+                .map(post -> {
+                            long likeCount = likeRepository.countByPost(post);
+                            return PostResponseDto.from(post,likeCount);
+                })
                 .toList();
     }
 
@@ -68,26 +72,8 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
-        return getResponseDto(post);
-    }
+        long likeCount = likeRepository.countByPost(post);
 
-    private PostResponseDto getResponseDto(Post post) {
-        return PostResponseDto.builder()
-                .id(post.getId())
-                .emotionTags(
-                        post.getEmotionTags().stream()
-                                .map(et -> et.getEmotionTag().getName())
-                                .toList()
-                )
-                .dailyTags(
-                        post.getDayTags().stream()
-                                .map(DayTag::getName)
-                                .toList()
-                )
-                .trackId(post.getSongTrackId())
-                .user(post.getUser().getNickname())
-                .createdAt(post.getCreatedAt())
-                .updatedAt(post.getUpdatedAt())
-                .build();
+        return PostResponseDto.from(post,likeCount);
     }
 }
