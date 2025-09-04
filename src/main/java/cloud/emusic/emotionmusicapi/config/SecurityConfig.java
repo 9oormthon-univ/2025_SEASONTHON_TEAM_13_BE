@@ -48,6 +48,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).hasRole("SWAGGER")
                         // 로그인(JWT 인증)된 사용자만 접근 가능
+                        .anyRequest().permitAll()
                 )
                 .httpBasic(withDefaults());
         return http.build();
