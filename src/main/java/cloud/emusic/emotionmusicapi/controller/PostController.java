@@ -79,8 +79,8 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public ResponseEntity<List<PostResponseDto>> getAllPosts(@AuthenticationPrincipal(expression = "id") Long userId) {
+        return ResponseEntity.ok(postService.getAllPosts(userId));
     }
 
     @Operation(summary = "게시글 단건 조회", description = "게시글 ID를 사용하여 특정 게시글을 조회합니다.")
@@ -95,8 +95,9 @@ public class PostController {
     })
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPostById(
-            @PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getPost(postId));
+            @PathVariable Long postId,
+            @AuthenticationPrincipal(expression = "id") Long userId){
+        return ResponseEntity.ok(postService.getPost(postId,userId));
     }
 
     @Operation(summary = "게시글 수정", description = "게시글 ID를 사용하여 특정 게시글을 수정합니다.")

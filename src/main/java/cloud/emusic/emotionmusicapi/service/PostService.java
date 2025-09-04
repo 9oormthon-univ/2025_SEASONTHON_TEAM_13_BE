@@ -61,26 +61,26 @@ public class PostService {
         return new PostCreateResponse(post.getId());
     }
 
-    public List<PostResponseDto> getAllPosts() {
+    public List<PostResponseDto> getAllPosts(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
         return postRepository.findAll().stream()
                 .map(post -> {
-                            long likeCount = likeRepository.countByPost(post);
-                            long commentCount = commentRepository.countByPost(post);
-                            boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
-                            return PostResponseDto.from(post,likeCount,isLiked,commentCount);
+                            return getPostResponse(post,user);
                 })
                 .toList();
     }
 
-    public PostResponseDto getPost(Long postId) {
+    public PostResponseDto getPost(Long postId,Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
-        long likeCount = likeRepository.countByPost(post);
-        long commentCount = commentRepository.countByPost(post);
-        boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        return PostResponseDto.from(post,likeCount,isLiked,commentCount);
+        return getPostResponse(post,user);
     }
 
     @Transactional
@@ -161,12 +161,14 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         return postRepository.findAllByUser(user).stream()
-                .map(post -> {
-                    long likeCount = likeRepository.countByPost(post);
-                    long commentCount = commentRepository.countByPost(post);
-                    boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
-                    return PostResponseDto.from(post,likeCount,isLiked,commentCount);
-                })
+                .map(post -> getPostResponse(post,user))
                 .toList();
+    }
+
+    private PostResponseDto getPostResponse(Post post,User user) {
+        long likeCount = likeRepository.countByPost(post);
+        long commentCount = commentRepository.countByPost(post);
+        boolean isLiked = likeRepository.existsByPostAndUser(post,user);
+        return PostResponseDto.from(post,likeCount,isLiked,commentCount);
     }
 }
