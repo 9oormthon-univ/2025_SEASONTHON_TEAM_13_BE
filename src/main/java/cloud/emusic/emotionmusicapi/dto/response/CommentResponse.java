@@ -9,6 +9,7 @@ public class CommentResponse {
   private final Long id;
   private final String content;
   private final String authorNickname;
+  private final String authorProfileImageUrl;
   private final LocalDateTime createdAt;
 
   public CommentResponse(Comment comment) {
@@ -16,5 +17,6 @@ public class CommentResponse {
     this.content = comment.getContent();
     this.authorNickname = comment.getUser().getNickname();
     this.createdAt = comment.getCreatedAt();
+    this.authorProfileImageUrl = comment.getUser().getProfileImage();
   }
 }
