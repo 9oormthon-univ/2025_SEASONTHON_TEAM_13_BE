@@ -11,10 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,4 +36,24 @@ public class LikeController {
         likeService.likePost(postId, userId);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "게시글 좋아요 취소", description = "특정 게시글의 좋아요를 취소합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "좋아요 취소 성공"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @DeleteMapping("/{postId}/like")
+    public ResponseEntity<Void> unlikePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal(expression = "id") Long userId
+    ) {
+        likeService.unLikePost(postId, userId);
+        return ResponseEntity.ok().build();
+    }
+
 }

@@ -34,4 +34,18 @@ public class LikeService {
 
         likeRepository.save(PostLike.create(user, post));
     }
+
+    @Transactional
+    public void unLikePost(Long postId,Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        PostLike like = likeRepository.findByUserAndPost(user, post)
+                .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
+
+        likeRepository.delete(like);
+    }
 }
