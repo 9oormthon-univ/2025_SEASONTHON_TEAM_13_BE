@@ -4,6 +4,9 @@ package cloud.emusic.emotionmusicapi.service;
 import cloud.emusic.emotionmusicapi.domain.Role;
 import cloud.emusic.emotionmusicapi.domain.User;
 import cloud.emusic.emotionmusicapi.dto.response.KakaoUserResponse;
+import cloud.emusic.emotionmusicapi.dto.response.UserInfoResponse;
+import cloud.emusic.emotionmusicapi.exception.CustomException;
+import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +50,11 @@ public class UserService {
 
         //JPA를 통한 Save
         userRepository.save(newUser);
+    }
+
+    public UserInfoResponse getUserInfo(Long userId){
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        return UserInfoResponse.from(user);
     }
 }
