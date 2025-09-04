@@ -37,6 +37,9 @@ public class PostResponseDto {
     @Schema(description = "좋아요 수", example = "10")
     private Long likeCount;
 
+    @Schema(description = "좋아요 여부", example = "true")
+    private Boolean likeState;
+
     @Schema(description = "댓글 수", example = "5")
     private Long commentCount;
 
@@ -46,7 +49,7 @@ public class PostResponseDto {
     @Schema(description = "수정일", example = "2025-09-05T14:56:23")
     private LocalDateTime updatedAt;
 
-    public static PostResponseDto from(Post post,Long likeCount, Long commentCount) {
+    public static PostResponseDto from(Post post,Long likeCount,boolean likeState, Long commentCount) {
         return PostResponseDto.builder()
                 .id(post.getId())
                 .emotionTags(
@@ -63,6 +66,7 @@ public class PostResponseDto {
                 .user(post.getUser().getNickname())
                 .userImageUrl(post.getUser().getProfileImage())
                 .likeCount(likeCount)
+                .likeState(likeState)
                 .commentCount(commentCount)
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())

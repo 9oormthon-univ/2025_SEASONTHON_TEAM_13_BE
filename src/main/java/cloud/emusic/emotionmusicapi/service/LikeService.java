@@ -64,9 +64,11 @@ public class LikeService {
         return likes.stream()
                 .map(like ->
                         {
-                            long likeCount = likeRepository.countByPost(like.getPost());
-                            long commentCount = commentRepository.countByPost(like.getPost());
-                            return PostResponseDto.from(like.getPost(),likeCount,commentCount);
+                            Post post = like.getPost();
+                            long likeCount = likeRepository.countByPost(post);
+                            long commentCount = commentRepository.countByPost(post);
+                            boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
+                            return PostResponseDto.from(post,likeCount,isLiked,commentCount);
                         })
                 .collect(Collectors.toList());
     }

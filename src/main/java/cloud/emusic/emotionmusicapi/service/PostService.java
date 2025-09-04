@@ -62,7 +62,8 @@ public class PostService {
                 .map(post -> {
                             long likeCount = likeRepository.countByPost(post);
                             long commentCount = commentRepository.countByPost(post);
-                            return PostResponseDto.from(post,likeCount,commentCount);
+                            boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
+                            return PostResponseDto.from(post,likeCount,isLiked,commentCount);
                 })
                 .toList();
     }
@@ -73,7 +74,8 @@ public class PostService {
 
         long likeCount = likeRepository.countByPost(post);
         long commentCount = commentRepository.countByPost(post);
+        boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
 
-        return PostResponseDto.from(post,likeCount,commentCount);
+        return PostResponseDto.from(post,likeCount,isLiked,commentCount);
     }
 }
