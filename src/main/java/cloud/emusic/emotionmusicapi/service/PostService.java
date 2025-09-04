@@ -6,10 +6,7 @@ import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
 import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
 import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
-import cloud.emusic.emotionmusicapi.repository.EmotionTagRepository;
-import cloud.emusic.emotionmusicapi.repository.LikeRepository;
-import cloud.emusic.emotionmusicapi.repository.PostRepository;
-import cloud.emusic.emotionmusicapi.repository.UserRepository;
+import cloud.emusic.emotionmusicapi.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +21,7 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
     private final EmotionTagRepository emotionTagRepository;
 
     public List<EmotionTagResponse>EmotionTag() {
@@ -63,7 +61,8 @@ public class PostService {
         return postRepository.findAll().stream()
                 .map(post -> {
                             long likeCount = likeRepository.countByPost(post);
-                            return PostResponseDto.from(post,likeCount);
+                            long commentCount = commentRepository.countByPost(post);
+                            return PostResponseDto.from(post,likeCount,commentCount);
                 })
                 .toList();
     }
@@ -73,7 +72,8 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
         long likeCount = likeRepository.countByPost(post);
+        long commentCount = commentRepository.countByPost(post);
 
-        return PostResponseDto.from(post,likeCount);
+        return PostResponseDto.from(post,likeCount,commentCount);
     }
 }
