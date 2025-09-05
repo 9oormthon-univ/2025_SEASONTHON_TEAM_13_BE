@@ -62,8 +62,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/url","login/authenticate","/posts/emotion-tags").permitAll()
-                        .requestMatchers("/posts/**").authenticated()
+                        .requestMatchers("/login/url","/login/authenticate","/posts/emotion-tags","/tags/**").permitAll()
+                        .requestMatchers("/posts/**","/users/me").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
