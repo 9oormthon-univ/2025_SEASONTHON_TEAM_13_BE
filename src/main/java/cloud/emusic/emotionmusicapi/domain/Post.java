@@ -31,8 +31,9 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DayTag> dayTags = new ArrayList<>();
 
-    @Column(name = "song_track_id", nullable = false, length = 100)
-    private String songTrackId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "song_id", nullable = false)
+    private Song song;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -40,9 +41,9 @@ public class Post {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Post(User user,String trackId) {
+    public Post(User user, Song song) {
         this.user = user;
-        this.songTrackId = trackId;
+        this.song = song;
     }
 
     public void addEmotionTag(PostEmotionTag tag) {
@@ -61,8 +62,7 @@ public class Post {
         this.dayTags.removeIf(dt -> dt.getName().equals(tagName));
     }
 
-    public void updateSongTrackId(String songTrackId) {
-        this.songTrackId = songTrackId;
+    public void updateSong(Song song) {
+        this.song = song;
     }
-
 }
