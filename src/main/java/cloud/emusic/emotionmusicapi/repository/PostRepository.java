@@ -21,4 +21,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     LIMIT :limit OFFSET :offset
 """, nativeQuery = true)
     List<Object[]> findPostsOrderByLikeCount(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query("SELECT DISTINCT p FROM Post p " +
+            "JOIN FETCH p.song " +
+            "JOIN FETCH p.emotionTags et " +
+            "JOIN FETCH et.emotionTag")
+    List<Post> findAllWithTrackAndTags();
 }
