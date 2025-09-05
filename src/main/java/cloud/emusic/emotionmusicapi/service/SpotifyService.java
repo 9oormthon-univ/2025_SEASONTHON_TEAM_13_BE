@@ -26,10 +26,10 @@ public class SpotifyService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${spotify.client-id}")
+    @Value("${SPOTIFY_CLIENT_ID}")
     private String clientId;
 
-    @Value("${spotify.client-secret}")
+    @Value("${SPOTIFY_CLIENT_SECRET}")
     private String clientSecret;
 
     public List<TrackResponse> recommendByEmotions(List<String> emotions, int limit) {
