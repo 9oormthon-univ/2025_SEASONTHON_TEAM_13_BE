@@ -58,4 +58,30 @@ public class SpotifyController {
     ) {
         return ResponseEntity.ok(spotifyService.recommendByEmotions(emotions, limit));
     }
+
+    @Operation(
+            summary = "곡명으로 노래 검색",
+            description = "Spotify API를 이용해 곡명으로 노래를 검색합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "검색 결과 반환 성공",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))
+                    )
+            ),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping("/search")
+    public List<TrackResponse> searchByName(
+            @Parameter(description = "검색할 곡명", example = "Blueming")
+            @RequestParam String query,
+            @Parameter(description = "검색 결과 개수", example = "50")
+            @RequestParam(defaultValue = "50") int limit
+    ) {
+        return spotifyService.searchTracksByTitleKorean(query, limit);
+    }
 }

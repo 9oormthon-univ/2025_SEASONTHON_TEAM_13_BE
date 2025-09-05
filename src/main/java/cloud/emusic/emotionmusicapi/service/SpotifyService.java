@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -94,6 +93,73 @@ public class SpotifyService {
         }
 
         // 4. 최종 결과: 요청한 개수만큼 반환
+        return allResults.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    public List<TrackResponse> searchTracksByTitleKorean(String keyword, int limit) {
+        String accessToken = getAccessToken();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        // 곡명 검색 (한국 마켓 우선)
+        String query = "track:" + keyword;
+
+        List<TrackResponse> allResults = new ArrayList<>();
+
+        try {
+            for (int offset = 0; offset < 200; offset += 50) {
+                String searchUrl = String.format(
+                        "https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR",
+                        query,
+                        offset
+                );
+
+                ResponseEntity<String> searchResponse = restTemplate.exchange(
+                        searchUrl, HttpMethod.GET, entity, String.class
+                );
+
+                JsonNode items = objectMapper.readTree(searchResponse.getBody())
+                        .path("tracks").path("items");
+
+                // 🔹 검색 키워드를 글자 단위로 분리
+                String[] tokens = keyword.replaceAll("\\s+", "").split("");
+
+                items.forEach(item -> {
+                    String name = item.get("name").asText();
+                    String artist = item.path("artists").get(0).get("name").asText();
+                    String releaseDate = item.path("album").path("release_date").asText();
+
+                    // 🔹 모든 글자가 제목에 포함되어 있는지 검사
+                    boolean containsAll = Arrays.stream(tokens)
+                            .allMatch(name::contains);
+
+                    if (!containsAll) return;
+
+                    String imageUrl = null;
+                    JsonNode images = item.path("album").path("images");
+                    if (images.isArray() && images.size() > 0) {
+                        imageUrl = images.get(0).get("url").asText();
+                    }
+
+                    allResults.add(new TrackResponse(
+                            item.get("id").asText(),
+                            name,
+                            artist,
+                            item.path("external_urls").get("spotify").asText(),
+                            imageUrl,
+                            0.0, 0.0
+                    ));
+                });
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Search API 파싱 실패", e);
+        }
+
         return allResults.stream()
                 .limit(limit)
                 .collect(Collectors.toList());
