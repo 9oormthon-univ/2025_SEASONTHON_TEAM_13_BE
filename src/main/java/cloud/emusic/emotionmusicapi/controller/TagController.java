@@ -1,5 +1,6 @@
 package cloud.emusic.emotionmusicapi.controller;
 
+import cloud.emusic.emotionmusicapi.dto.response.EmotionTrackGroupResponse;
 import cloud.emusic.emotionmusicapi.dto.response.TagRankingResponseWrapper;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.TagService;
@@ -15,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +44,20 @@ public class TagController {
     @GetMapping("/ranking")
     public ResponseEntity<TagRankingResponseWrapper> getAllTagRankings() {
         return ResponseEntity.ok(tagService.getTagRankings());
+    }
+
+    @Operation(summary = "태그별 노래 랭크 조회",
+            description = "감정 태그별로 사용된 노래들을 사용 횟수 순으로 정렬하여 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EmotionTrackGroupResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/song-rank")
+    public ResponseEntity<List<EmotionTrackGroupResponse>> getTracksByEmotion() {
+        return ResponseEntity.ok(tagService.getTracksByEmotion());
     }
 
 }
