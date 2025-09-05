@@ -1,10 +1,11 @@
 package cloud.emusic.emotionmusicapi.service;
 
 import cloud.emusic.emotionmusicapi.domain.*;
-import cloud.emusic.emotionmusicapi.dto.response.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
+import cloud.emusic.emotionmusicapi.dto.response.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
 import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
+import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.*;
 import jakarta.transaction.Transactional;
@@ -30,32 +31,45 @@ public class PostService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final EmotionTagRepository emotionTagRepository;
+    private final SongRepository songRepository;
+    private final SpotifyService spotifyService;
 
-    public List<EmotionTagResponse>EmotionTag() {
+    public List<EmotionTagResponse> EmotionTag() {
         return emotionTagRepository.findAll().stream()
-                .map(tag -> new EmotionTagResponse(tag.getId(),tag.getName()))
-                .toList();
+            .map(tag -> new EmotionTagResponse(tag.getId(), tag.getName()))
+            .toList();
     }
 
     @Transactional
     public PostCreateResponse createPost(Long userId, PostCreateRequest request) {
-
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        // 2. Post 엔티티 생성
-        Post post = new Post(user,request.getSongTrackId());
+        Song song = songRepository.findByTrackId(request.getSongTrackId())
+            .orElseGet(() -> {
+                TrackResponse trackInfo = spotifyService.getTrackById(request.getSongTrackId());
 
-        // 3. 감정 태그 매핑 → PostEmotionTag 엔티티 생성
+                Song newSong = Song.builder()
+                    .trackId(trackInfo.getId())
+                    .title(trackInfo.getName())
+                    .artist(trackInfo.getArtist())
+                    .albumArtUrl(trackInfo.getImageUrl())
+                    .spotifyPlayUrl(trackInfo.getSpotifyUrl())
+                    .build();
+
+                return songRepository.save(newSong);
+            });
+
+        Post post = new Post(user, song);
+
         request.getEmotionTags().forEach(tagName -> {
             EmotionTag emotionTag = emotionTagRepository.findByName(tagName)
-                    .orElseThrow(() -> new CustomException(EMOTION_TAG_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(EMOTION_TAG_NOT_FOUND));
             post.addEmotionTag(new PostEmotionTag(post, emotionTag));
         });
 
-        // 4. 하루 태그 매핑 → DayTag 엔티티 생성
         request.getDailyTags().forEach(tagName -> {
-            DayTag dayTag = DayTag.create(tagName,post);
+            DayTag dayTag = DayTag.create(tagName, post);
             post.addDayTag(dayTag);
         });
 
@@ -64,115 +78,122 @@ public class PostService {
         return new PostCreateResponse(post.getId());
     }
 
-    public List<PostResponseDto> getAllPosts(Long userId,String sortBy,String direction,int page,int size) {
+    public List<PostResponseDto> getAllPosts(Long userId, String sortBy, String direction, int page, int size) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         if (sortBy.equals("likeCount")) {
             return postRepository.findPostsOrderByLikeCount(size, page * size).stream()
                 .map(result -> {
                     Long postId = ((Number) result[0]).longValue();
                     Post post = postRepository.findById(postId)
-                            .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+                        .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
-                    Long likeCount = ((Number) result[result.length - 1]).longValue(); // 마지막 컬럼이 like_count
+                    Long likeCount = ((Number) result[result.length - 1]).longValue();
                     Long commentCount = commentRepository.countByPost(post);
                     boolean isLiked = likeRepository.existsByPostAndUser(post, user);
 
                     return PostResponseDto.from(post, likeCount, isLiked, commentCount);
                 }).toList();
-        }
-        else {
+        } else {
             Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
             return postRepository.findAll(pageable).stream()
-                    .map(post -> {
-                        long likeCount = likeRepository.countByPost(post);
-                        long commentCount = commentRepository.countByPost(post);
-                        boolean isLiked = likeRepository.existsByPostAndUser(post, user);
-                        return PostResponseDto.from(post, likeCount, isLiked, commentCount);
-                    })
-                    .toList();
+                .map(post -> {
+                    long likeCount = likeRepository.countByPost(post);
+                    long commentCount = commentRepository.countByPost(post);
+                    boolean isLiked = likeRepository.existsByPostAndUser(post, user);
+                    return PostResponseDto.from(post, likeCount, isLiked, commentCount);
+                })
+                .toList();
         }
     }
 
-    public PostResponseDto getPost(Long postId,Long userId) {
+    public PostResponseDto getPost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        return getPostResponse(post,user);
+        return getPostResponse(post, user);
     }
 
     @Transactional
     public PostResponseDto updatePost(Long postId, PostCreateRequest request, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
         if (!post.getUser().getId().equals(userId)) {
             throw new CustomException(INVALID_PERMISSION);
         }
 
-        post.updateSongTrackId(request.getSongTrackId());
+        if (!post.getSong().getTrackId().equals(request.getSongTrackId())) {
+            Song song = songRepository.findByTrackId(request.getSongTrackId())
+                .orElseGet(() -> {
+                    TrackResponse trackInfo = spotifyService.getTrackById(request.getSongTrackId());
+                    Song newSong = Song.builder()
+                        .trackId(trackInfo.getId())
+                        .title(trackInfo.getName())
+                        .artist(trackInfo.getArtist())
+                        .albumArtUrl(trackInfo.getImageUrl())
+                        .spotifyPlayUrl(trackInfo.getSpotifyUrl())
+                        .build();
+                    return songRepository.save(newSong);
+                });
+            post.updateSong(song);
+        }
 
-        // ===== 감정 태그 업데이트 =====
         Set<String> newEmotionTags = new HashSet<>(request.getEmotionTags());
         Set<String> oldEmotionTags = post.getEmotionTags().stream()
-                .map(et -> et.getEmotionTag().getName())
-                .collect(Collectors.toSet());
+            .map(et -> et.getEmotionTag().getName())
+            .collect(Collectors.toSet());
 
-        // 제거할 태그
         oldEmotionTags.stream()
-                .filter(tag -> !newEmotionTags.contains(tag))
-                .forEach(post::removeEmotionTag);
+            .filter(tag -> !newEmotionTags.contains(tag))
+            .forEach(post::removeEmotionTag);
 
-        // 추가할 태그
         newEmotionTags.stream()
-                .filter(tag -> !oldEmotionTags.contains(tag))
-                .forEach(tag -> {
-                    EmotionTag emotionTag = emotionTagRepository.findByName(tag)
-                            .orElseThrow(() -> new CustomException(EMOTION_TAG_NOT_FOUND));
-                    post.addEmotionTag(new PostEmotionTag(post, emotionTag));
-                });
+            .filter(tag -> !oldEmotionTags.contains(tag))
+            .forEach(tag -> {
+                EmotionTag emotionTag = emotionTagRepository.findByName(tag)
+                    .orElseThrow(() -> new CustomException(EMOTION_TAG_NOT_FOUND));
+                post.addEmotionTag(new PostEmotionTag(post, emotionTag));
+            });
 
-        // ===== 하루 태그 업데이트 (동일 로직) =====
         Set<String> newDayTags = new HashSet<>(request.getDailyTags());
         Set<String> oldDayTags = post.getDayTags().stream()
-                .map(DayTag::getName)
-                .collect(Collectors.toSet());
+            .map(DayTag::getName)
+            .collect(Collectors.toSet());
 
         oldDayTags.stream()
-                .filter(tag -> !newDayTags.contains(tag))
-                .forEach(post::removeDayTag);
+            .filter(tag -> !newDayTags.contains(tag))
+            .forEach(post::removeDayTag);
 
         newDayTags.stream()
-                .filter(tag -> !oldDayTags.contains(tag))
-                .forEach(tag -> post.addDayTag(DayTag.create(tag, post)));
+            .filter(tag -> !oldDayTags.contains(tag))
+            .forEach(tag -> post.addDayTag(DayTag.create(tag, post)));
 
-        // ===== 추가 정보 반환 =====
         long likeCount = likeRepository.countByPost(post);
         long commentCount = commentRepository.countByPost(post);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         boolean isLiked = likeRepository.existsByPostAndUser(post, user);
 
-        return PostResponseDto.from(post, likeCount,isLiked,commentCount);
+        return PostResponseDto.from(post, likeCount, isLiked, commentCount);
     }
 
     @Transactional
-    public void deletePost(Long postId,Long userId) {
+    public void deletePost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
         if (!post.getUser().getId().equals(userId)) {
             throw new CustomException(INVALID_PERMISSION);
         }
 
-        // 연관된 댓글과 좋아요 먼저 삭제
         commentRepository.deleteByPost(post);
         likeRepository.deleteByPost(post);
 
@@ -181,17 +202,17 @@ public class PostService {
 
     public List<PostResponseDto> getPostCalendar(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+            .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         return postRepository.findAllByUser(user).stream()
-                .map(post -> getPostResponse(post,user))
-                .toList();
+            .map(post -> getPostResponse(post, user))
+            .toList();
     }
 
-    private PostResponseDto getPostResponse(Post post,User user) {
+    private PostResponseDto getPostResponse(Post post, User user) {
         long likeCount = likeRepository.countByPost(post);
         long commentCount = commentRepository.countByPost(post);
-        boolean isLiked = likeRepository.existsByPostAndUser(post,user);
-        return PostResponseDto.from(post,likeCount,isLiked,commentCount);
+        boolean isLiked = likeRepository.existsByPostAndUser(post, user);
+        return PostResponseDto.from(post, likeCount, isLiked, commentCount);
     }
 }

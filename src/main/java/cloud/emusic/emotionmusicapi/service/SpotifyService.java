@@ -2,6 +2,8 @@ package cloud.emusic.emotionmusicapi.service;
 
 import cloud.emusic.emotionmusicapi.dto.request.EmotionMapper;
 import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
+import cloud.emusic.emotionmusicapi.exception.CustomException;
+import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,158 +39,160 @@ public class SpotifyService {
 
     public List<TrackResponse> recommendByEmotions(List<String> emotions, int limit) {
         String accessToken = getAccessToken();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        // 1. 감정 → 장르 매핑
         List<String> genres = EmotionMapper.getGenres(emotions);
-        String query = genres.stream()
-                .map(g -> "genre:" + g)
-                .collect(Collectors.joining(" OR "));
-        query = "korean " + query + " year:2015-2025"; // 한국어 + 최신곡 조건
+        String query = genres.stream().map(g -> "genre:" + g).collect(Collectors.joining(" OR "));
+        query = "korean " + query + " year:2015-2025";
 
         List<TrackResponse> allResults = new ArrayList<>();
 
-        // 2. 최대 200곡 가져오기 (50 * 4)
         for (int offset = 0; offset < 200; offset += 50) {
             String searchUrl = String.format(
-                    "https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR",
-                    URLEncoder.encode(query, StandardCharsets.UTF_8),
-                    offset
+                "https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR",
+                URLEncoder.encode(query, StandardCharsets.UTF_8),
+                offset
             );
 
-            ResponseEntity<String> searchResponse = restTemplate.exchange(
-                    searchUrl, HttpMethod.GET, entity, String.class
-            );
+            ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
 
             try {
-                JsonNode items = objectMapper.readTree(searchResponse.getBody())
-                        .path("tracks").path("items");
-
+                JsonNode items = objectMapper.readTree(searchResponse.getBody()).path("tracks").path("items");
                 items.forEach(item -> {
                     String name = item.get("name").asText();
-                    String releaseDate = item.path("album").path("release_date").asText();
+                    JsonNode albumNode = item.path("album");
+                    String releaseDate = albumNode.path("release_date").asText();
 
-                    // 3. 필터링: 한국어/숫자 제목 + 발매일 조건
-                    if (!name.matches(".*[가-힣0-9].*")) return;
-                    if (releaseDate.compareTo("2015-01-01") < 0) return;
+                    if (!name.matches(".*[가-힣0-9].*") || releaseDate.compareTo("2015-01-01") < 0) return;
 
                     String imageUrl = null;
-                    JsonNode images = item.path("album").path("images");
-                    if (images.isArray() && images.size() > 0) {
+                    JsonNode images = albumNode.path("images");
+                    if (images.isArray() && !images.isEmpty()) {
                         imageUrl = images.get(0).get("url").asText();
                     }
 
                     allResults.add(new TrackResponse(
-                            item.get("id").asText(),
-                            name,
-                            item.path("artists").get(0).get("name").asText(),
-                            item.path("external_urls").get("spotify").asText(),
-                            imageUrl,
-                            0.0, 0.0
+                        item.get("id").asText(),
+                        name,
+                        item.path("artists").get(0).get("name").asText(),
+                        item.path("external_urls").get("spotify").asText(),
+                        imageUrl,
+                        albumNode.path("name").asText(null), // 앨범명 추가
+                        releaseDate,                       // 발매일 추가
+                        0.0,
+                        0.0
                     ));
                 });
             } catch (Exception e) {
                 throw new RuntimeException("Search API 파싱 실패", e);
             }
         }
-
-        // 4. 최종 결과: 요청한 개수만큼 반환
-        return allResults.stream()
-                .limit(limit)
-                .collect(Collectors.toList());
+        return allResults.stream().limit(limit).collect(Collectors.toList());
     }
 
-    public List<TrackResponse> searchTracksByTitleKorean(String keyword, int limit) {
+    public TrackResponse getTrackById(String trackId) {
         String accessToken = getAccessToken();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        // 곡명 검색 (한국 마켓 우선)
-        String query = "track:" + keyword;
+        String url = "https://api.spotify.com/v1/tracks/" + trackId;
 
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            JsonNode track = objectMapper.readTree(response.getBody());
+
+            JsonNode albumNode = track.path("album");
+            String albumName = albumNode.path("name").asText(null);
+            String releaseDate = albumNode.path("release_date").asText(null);
+
+            String imageUrl = null;
+            JsonNode images = albumNode.path("images");
+            if (images.isArray() && !images.isEmpty()) {
+                imageUrl = images.get(0).get("url").asText();
+            }
+
+            return new TrackResponse(
+                track.get("id").asText(),
+                track.get("name").asText(),
+                track.path("artists").get(0).get("name").asText(),
+                track.path("external_urls").get("spotify").asText(),
+                imageUrl,
+                albumName,
+                releaseDate,
+                0.0,
+                0.0
+            );
+        } catch (Exception e) {
+            log.error("Spotify API getTrackById 실패: trackId={}, error={}", trackId, e.getMessage());
+            throw new CustomException(ErrorCode.SPOTIFY_API_ERROR);
+        }
+    }
+
+    public List<TrackResponse> searchTracksByTitleKorean(String keyword, int limit) {
+        String accessToken = getAccessToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        String query = "track:" + keyword;
         List<TrackResponse> allResults = new ArrayList<>();
 
         try {
             for (int offset = 0; offset < 200; offset += 50) {
-                String searchUrl = String.format(
-                        "https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR",
-                        query,
-                        offset
-                );
+                String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR", query, offset);
+                ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
+                JsonNode items = objectMapper.readTree(searchResponse.getBody()).path("tracks").path("items");
 
-                ResponseEntity<String> searchResponse = restTemplate.exchange(
-                        searchUrl, HttpMethod.GET, entity, String.class
-                );
-
-                JsonNode items = objectMapper.readTree(searchResponse.getBody())
-                        .path("tracks").path("items");
-
-                // 🔹 검색 키워드를 글자 단위로 분리
                 String[] tokens = keyword.replaceAll("\\s+", "").split("");
 
                 items.forEach(item -> {
                     String name = item.get("name").asText();
-                    String artist = item.path("artists").get(0).get("name").asText();
-                    String releaseDate = item.path("album").path("release_date").asText();
+                    if (Arrays.stream(tokens).allMatch(name::contains)) {
+                        JsonNode albumNode = item.path("album");
+                        String imageUrl = null;
+                        JsonNode images = albumNode.path("images");
+                        if (images.isArray() && !images.isEmpty()) {
+                            imageUrl = images.get(0).get("url").asText();
+                        }
 
-                    // 🔹 모든 글자가 제목에 포함되어 있는지 검사
-                    boolean containsAll = Arrays.stream(tokens)
-                            .allMatch(name::contains);
-
-                    if (!containsAll) return;
-
-                    String imageUrl = null;
-                    JsonNode images = item.path("album").path("images");
-                    if (images.isArray() && images.size() > 0) {
-                        imageUrl = images.get(0).get("url").asText();
-                    }
-
-                    allResults.add(new TrackResponse(
+                        allResults.add(new TrackResponse(
                             item.get("id").asText(),
                             name,
-                            artist,
+                            item.path("artists").get(0).get("name").asText(),
                             item.path("external_urls").get("spotify").asText(),
                             imageUrl,
-                            0.0, 0.0
-                    ));
+                            albumNode.path("name").asText(null), // 앨범명 추가
+                            albumNode.path("release_date").asText(null), // 발매일 추가
+                            0.0,
+                            0.0
+                        ));
+                    }
                 });
             }
         } catch (Exception e) {
             throw new RuntimeException("Search API 파싱 실패", e);
         }
-
-        return allResults.stream()
-                .limit(limit)
-                .collect(Collectors.toList());
+        return allResults.stream().limit(limit).collect(Collectors.toList());
     }
-
 
     private String getAccessToken() {
         String url = "https://accounts.spotify.com/api/token";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBasicAuth(clientId, clientSecret); // client_id:client_secret → Base64 자동 인코딩
+        headers.setBasicAuth(clientId, clientSecret);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                request,
-                Map.class
-        );
-
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
         return (String) response.getBody().get("access_token");
     }
 }

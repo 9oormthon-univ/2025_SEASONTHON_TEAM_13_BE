@@ -28,7 +28,8 @@ public enum ErrorCode {
 
     // 좋아요
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다."),
-    LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글에 좋아요를 누르지 않았습니다."),;
+    LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, "게시글에 좋아요를 누르지 않았습니다."),
+    SPOTIFY_API_ERROR(HttpStatus.BAD_REQUEST, "Spotify API 요청 중 오류가 발생했습니다.");
     private final HttpStatus status;
     private final String message;
 }
