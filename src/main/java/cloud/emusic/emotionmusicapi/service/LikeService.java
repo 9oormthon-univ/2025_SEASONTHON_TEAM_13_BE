@@ -67,7 +67,7 @@ public class LikeService {
                             Post post = like.getPost();
                             long likeCount = likeRepository.countByPost(post);
                             long commentCount = commentRepository.countByPost(post);
-                            boolean isLiked = likeRepository.existsByPostAndUser(post,post.getUser());
+                            boolean isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), userId);
                             return PostResponseDto.from(post,likeCount,isLiked,commentCount);
                         })
                 .collect(Collectors.toList());
