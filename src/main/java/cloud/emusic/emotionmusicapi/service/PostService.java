@@ -10,6 +10,7 @@ import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -223,6 +224,21 @@ public class PostService {
 
         return post != null ? getPostResponse(post, user) : null;
     }
+
+    public List<PostResponseDto> searchPostsTag(Long userId,String dayTag,String emtionTag,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Post> posts = postRepository.searchPosts(emtionTag,dayTag, pageable);
+
+        return posts.stream()
+                .map(post -> {
+                    long likeCount = likeRepository.countByPost(post);
+                    long commentCount = commentRepository.countByPost(post);
+                    boolean isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), userId);
+                    return PostResponseDto.from(post, likeCount, isLiked, commentCount);
+                }).toList();
+    }
+
 
     private PostResponseDto getPostResponse(Post post, User user) {
         long likeCount = likeRepository.countByPost(post);
