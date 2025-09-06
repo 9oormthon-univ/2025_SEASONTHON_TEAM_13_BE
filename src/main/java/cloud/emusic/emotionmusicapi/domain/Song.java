@@ -44,4 +44,9 @@ public class Song {
     this.spotifyPlayUrl = spotifyPlayUrl;
     this.playCount = 0;
   }
+
+  public void plusPlayCount() {
+    this.playCount += 1;
+  }
+
 }

@@ -12,10 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -83,5 +80,22 @@ public class SpotifyController {
             @RequestParam(defaultValue = "50") int limit
     ) {
         return spotifyService.searchTracksByTitleKorean(query, limit);
+    }
+
+    @Operation(
+            summary = "게시글 노래 재생 횟수 증가",
+            description = "해당 게시글의 노래의 재생 횟수를 증가 합니다"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "게시글 노래 재생 횟수 증가 성공"
+            ),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @PostMapping("/{postId}/count")
+    public ResponseEntity<Void> songCountUp(@PathVariable Long postId){
+        spotifyService.songCountUp(postId);
+        return ResponseEntity.noContent().build();
     }
 }

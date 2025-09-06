@@ -1,11 +1,14 @@
 package cloud.emusic.emotionmusicapi.service;
 
+import cloud.emusic.emotionmusicapi.domain.Post;
 import cloud.emusic.emotionmusicapi.dto.request.EmotionMapper;
 import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
+import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +33,8 @@ public class SpotifyService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private final PostRepository postRepository;
 
     @Value("${SPOTIFY_CLIENT_ID}")
     private String clientId;
@@ -179,6 +184,16 @@ public class SpotifyService {
             throw new RuntimeException("Search API 파싱 실패", e);
         }
         return allResults.stream().limit(limit).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void songCountUp(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(
+                () ->  new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        post.getSong().plusPlayCount();
+
+        postRepository.save(post);
     }
 
     private String getAccessToken() {
