@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -211,10 +212,14 @@ public class PostService {
     }
 
     public PostResponseDto getMyPost (Long userId, LocalDate createdDate) {
+
+        LocalDateTime start = createdDate.atStartOfDay();
+        LocalDateTime end = createdDate.plusDays(1).atStartOfDay();
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        return getPostResponse(postRepository.findByUserAndCreatedDate(user,createdDate),user);
+        return getPostResponse(postRepository.findByUserAndCreatedDate(user,start,end),user);
     }
 
     private PostResponseDto getPostResponse(Post post, User user) {
