@@ -192,4 +192,34 @@ public class PostController {
         PostResponseDto response = postService.getMyPost(userId, createdDate);
         return ResponseEntity.ok(Objects.requireNonNullElse(response, "null"));
     }
+
+    @Operation(summary = "게시글 검색", description = "하루 태그, 감정 태그로 게시글을 검색합니다. (감정,하루 태그 선택 가능)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "검색 성공",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponseDto.class)))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<PostResponseDto>> searchPosts(
+            @AuthenticationPrincipal(expression = "id") Long userId,
+
+            @Parameter(description = "검색할 하루 태그 (optional)")
+            @RequestParam(required = false) String dayTag,
+
+            @Parameter(description = "검색할 감정 태그 (optional)")
+            @RequestParam(required = false) String emotionTag,
+
+            @Parameter(description = "조회할 페이지 번호 (0부터 시작)")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "조회할 페이지 크기")
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                postService.searchPostsTag(userId, dayTag, emotionTag, page, size)
+        );
+    }
+
 }

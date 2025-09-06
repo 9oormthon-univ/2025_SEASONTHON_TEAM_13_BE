@@ -2,6 +2,8 @@ package cloud.emusic.emotionmusicapi.repository;
 
 import cloud.emusic.emotionmusicapi.domain.Post;
 import cloud.emusic.emotionmusicapi.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,4 +37,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "JOIN FETCH p.emotionTags et " +
             "JOIN FETCH et.emotionTag")
     List<Post> findAllWithTrackAndTags();
+
+    @Query("""
+    SELECT DISTINCT p 
+    FROM Post p
+    LEFT JOIN p.emotionTags et
+    LEFT JOIN p.dayTags dt
+    WHERE (:emotionTag IS NULL OR et.emotionTag.name = :emotionTag)
+    AND (:dayTag IS NULL OR dt.name = :dayTag)
+    """)
+    Page<Post> searchPosts(
+        @Param("emotionTag") String emotionTag,
+        @Param("dayTag") String dayTag,
+        Pageable pageable
+    );
+
 }
