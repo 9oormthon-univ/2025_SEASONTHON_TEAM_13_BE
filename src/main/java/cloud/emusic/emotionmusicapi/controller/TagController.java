@@ -5,6 +5,7 @@ import cloud.emusic.emotionmusicapi.dto.response.TagRankingResponseWrapper;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -56,8 +58,10 @@ public class TagController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/song-rank")
-    public ResponseEntity<List<EmotionTrackGroupResponse>> getTracksByEmotion() {
-        return ResponseEntity.ok(tagService.getTracksByEmotion());
+    public ResponseEntity<List<EmotionTrackGroupResponse>> getTracksByEmotion(
+            @Parameter(description = "조회할 감정 태그 이름", example = "슬픔,기쁨")
+            @RequestParam String tagName) {
+        return ResponseEntity.ok(tagService.getTracksByEmotion(tagName));
     }
 
 }
