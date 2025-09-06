@@ -16,11 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-<<<<<<< HEAD
 import org.springframework.web.util.UriComponentsBuilder;
-=======
->>>>>>> origin/master
+
 
 @RestController
 @RequestMapping("/login")
@@ -40,7 +37,6 @@ public class LoginController {
   public String getLoginUrl(HttpServletRequest request) {
     // 현재 요청 URL을 기반으로 Redirect URI를 동적으로 생성합니다.
     // 예: http://localhost:8080/login/url -> http://localhost:8080/login/authenticate
-<<<<<<< HEAD
     String referer = request.getHeader("Referer");
     if (referer == null) {
       return null; // referer가 없을 경우 처리
@@ -56,29 +52,18 @@ public class LoginController {
     // 3. 원하는 하위 패스 추가
     String newUrl = UriComponentsBuilder.fromHttpUrl(baseUri)
         .path("/oauth/callback")
-=======
-    String redirectUri = ServletUriComponentsBuilder.fromRequest(request)
-        .replacePath("/oauth/callback") // 경로는 /login/authenticate로 고정
-        .query(null) // 기존 쿼리 파라미터는 제거
->>>>>>> origin/master
         .build()
         .toUriString();
-
     return "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=" +
         this.kakaoRestApiKey +
         "&redirect_uri=" +
-<<<<<<< HEAD
         newUrl +
-=======
-        redirectUri +
->>>>>>> origin/master
         "&scope=account_email,profile_nickname,profile_image";
   }
 
   @GetMapping("/authenticate")
   public LoginResponse authenticate(@ParameterObject LoginRequest loginRequest, HttpServletRequest request) {
 
-<<<<<<< HEAD
     String referer = request.getHeader("Referer");
     if (referer == null) {
       return null; // referer가 없을 경우 처리
@@ -101,18 +86,6 @@ public class LoginController {
 
     // 1. Get Access Token from Kakao
     KakaoTokenResponse tokenResponse = getKakaoToken(loginRequest.getCode(), newUrl);
-=======
-    // 카카오로부터 받은 요청에서 Redirect URI를 다시 생성합니다.
-    // 예: http://localhost:8080/login/authenticate?code=... -> http://localhost:8080/oauth/callback
-    String redirectUri = ServletUriComponentsBuilder.fromRequest(request)
-        .replacePath("/oauth/callback") // 경로는 /login/authenticate로 고정
-        .query(null) // 카카오가 추가한 code 파라미터를 제거
-        .build()
-        .toUriString();
-
-    // 1. Get Access Token from Kakao
-    KakaoTokenResponse tokenResponse = getKakaoToken(loginRequest.getCode(), redirectUri);
->>>>>>> origin/master
 
     // 2. Get User Info from Kakao
     KakaoUserResponse userResponse = getKakaoUser(tokenResponse.getAccessToken());
