@@ -93,9 +93,9 @@ public class SpotifyController {
             ),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    @PostMapping("/{postId}/count")
-    public ResponseEntity<Void> songCountUp(@PathVariable Long postId){
-        spotifyService.songCountUp(postId);
+    @PostMapping("/{trackId}/count")
+    public ResponseEntity<Void> songCountUp(@PathVariable String trackId){
+        spotifyService.songCountUp(trackId);
         return ResponseEntity.noContent().build();
     }
 }
