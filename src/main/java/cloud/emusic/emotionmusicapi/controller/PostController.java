@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -184,10 +185,11 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/me")
-    public ResponseEntity<PostResponseDto> getMyPost(
+    public ResponseEntity<Object> getMyPost(
             @AuthenticationPrincipal(expression = "id") Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate createdDate
     ) {
-        return ResponseEntity.ok(postService.getMyPost(userId,createdDate));
+        PostResponseDto response = postService.getMyPost(userId, createdDate);
+        return ResponseEntity.ok(Objects.requireNonNullElse(response, "null"));
     }
 }

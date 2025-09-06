@@ -219,7 +219,9 @@ public class PostService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
-        return getPostResponse(postRepository.findByUserAndCreatedDate(user,start,end),user);
+        Post post = postRepository.findByUserAndCreatedDate(user,start,end).orElse(null);
+
+        return post != null ? getPostResponse(post, user) : null;
     }
 
     private PostResponseDto getPostResponse(Post post, User user) {
