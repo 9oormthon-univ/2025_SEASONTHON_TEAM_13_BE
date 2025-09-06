@@ -16,10 +16,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -168,5 +171,23 @@ public class PostController {
             @AuthenticationPrincipal(expression = "id") Long userId
     ) {
         return ResponseEntity.ok(postService.getPostCalendar(userId));
+    }
+
+    @Operation(summary = "자신이 작성한 게시글 날자별 단건 조회", description = "로그인한 사용자가 작성한 게시글을 날짜별로 단건 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/me")
+    public ResponseEntity<PostResponseDto> getMyPost(
+            @AuthenticationPrincipal(expression = "id") Long userId,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate createdDate
+    ) {
+        return ResponseEntity.ok(postService.getMyPost(userId,createdDate));
     }
 }

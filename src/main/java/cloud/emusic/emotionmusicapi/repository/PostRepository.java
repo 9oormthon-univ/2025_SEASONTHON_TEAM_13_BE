@@ -6,11 +6,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findAllByUser(User user);
+
+    @Query("SELECT p FROM Post p WHERE p.user = :user AND DATE(p.createdAt) = :date")
+    Post findByUserAndCreatedDate(@Param("user") User user, @Param("date") LocalDate date);
 
     @Query(value = """
     SELECT p.*, COUNT(pl.post_id) AS like_count
