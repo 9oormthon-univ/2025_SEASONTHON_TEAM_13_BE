@@ -205,11 +205,8 @@ public class PostController {
     public ResponseEntity<List<PostResponseDto>> searchPosts(
             @AuthenticationPrincipal(expression = "id") Long userId,
 
-            @Parameter(description = "검색할 하루 태그 (optional)")
-            @RequestParam(required = false) String dayTag,
-
-            @Parameter(description = "검색할 감정 태그 (optional)")
-            @RequestParam(required = false) String emotionTag,
+            @Parameter(description = "검색할 감정,하루 태그 (optional)")
+            @RequestParam(required = false) String tag,
 
             @Parameter(description = "조회할 페이지 번호 (0부터 시작)")
             @RequestParam(defaultValue = "0") int page,
@@ -218,7 +215,7 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(
-                postService.searchPostsTag(userId, dayTag, emotionTag, page, size)
+                postService.searchPostsTag(userId, tag, page, size)
         );
     }
 

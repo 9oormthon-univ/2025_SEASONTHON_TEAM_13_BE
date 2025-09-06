@@ -225,10 +225,10 @@ public class PostService {
         return post != null ? getPostResponse(post, user) : null;
     }
 
-    public List<PostResponseDto> searchPostsTag(Long userId,String dayTag,String emtionTag,int page, int size) {
+    public List<PostResponseDto> searchPostsTag(Long userId,String tag,int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Post> posts = postRepository.searchPosts(emtionTag,dayTag, pageable);
+        Page<Post> posts = postRepository.searchPostsByTag(tag, pageable);
 
         return posts.stream()
                 .map(post -> {
