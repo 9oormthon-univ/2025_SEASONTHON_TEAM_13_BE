@@ -1,11 +1,11 @@
 package cloud.emusic.emotionmusicapi.service;
 
-import cloud.emusic.emotionmusicapi.domain.Post;
+import cloud.emusic.emotionmusicapi.domain.Song;
 import cloud.emusic.emotionmusicapi.dto.request.EmotionMapper;
 import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
-import cloud.emusic.emotionmusicapi.repository.PostRepository;
+import cloud.emusic.emotionmusicapi.repository.SongRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -20,10 +20,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +31,7 @@ public class SpotifyService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final PostRepository postRepository;
+    private final SongRepository songRepository;
 
     @Value("${SPOTIFY_CLIENT_ID}")
     private String clientId;
@@ -187,13 +184,13 @@ public class SpotifyService {
     }
 
     @Transactional
-    public void songCountUp(Long postId){
-        Post post = postRepository.findById(postId).orElseThrow(
-                () ->  new CustomException(ErrorCode.POST_NOT_FOUND));
+    public void songCountUp(String trackId){
+        Song song = songRepository.findByTrackId(trackId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.SONG_NOT_FOUND));
 
-        post.getSong().plusPlayCount();
+        song.plusPlayCount();
 
-        postRepository.save(post);
+        songRepository.save(song);
     }
 
     private String getAccessToken() {
