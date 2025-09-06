@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -207,6 +208,13 @@ public class PostService {
         return postRepository.findAllByUser(user).stream()
             .map(post -> getPostResponse(post, user))
             .toList();
+    }
+
+    public PostResponseDto getMyPost (Long userId, LocalDate createdDate) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
+        return getPostResponse(postRepository.findByUserAndCreatedDate(user,createdDate),user);
     }
 
     private PostResponseDto getPostResponse(Post post, User user) {
