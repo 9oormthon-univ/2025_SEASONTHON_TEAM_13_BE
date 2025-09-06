@@ -39,17 +39,15 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllWithTrackAndTags();
 
     @Query("""
-    SELECT DISTINCT p 
-    FROM Post p
-    LEFT JOIN p.emotionTags et
-    LEFT JOIN p.dayTags dt
-    WHERE (:emotionTag IS NULL OR et.emotionTag.name = :emotionTag)
-    AND (:dayTag IS NULL OR dt.name = :dayTag)
-    """)
-    Page<Post> searchPosts(
-        @Param("emotionTag") String emotionTag,
-        @Param("dayTag") String dayTag,
-        Pageable pageable
+SELECT DISTINCT p 
+FROM Post p
+LEFT JOIN p.emotionTags et
+LEFT JOIN p.dayTags dt
+WHERE (:tag IS NULL OR et.emotionTag.name = :tag OR dt.name = :tag)
+""")
+    Page<Post> searchPostsByTag(
+            @Param("tag") String tag,
+            Pageable pageable
     );
 
 }
