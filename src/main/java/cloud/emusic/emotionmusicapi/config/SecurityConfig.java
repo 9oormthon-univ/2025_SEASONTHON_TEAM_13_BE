@@ -78,6 +78,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:8080", // 로컬 테스트 환경 (React 기본 포트)
                 "https://emusic.cloud",     // 배포 환경
+                "https://www.emusic.cloud",
                 "https://api.emusic.cloud", // API 서버 도메인
                 "http://localhost:5173"
         ));
