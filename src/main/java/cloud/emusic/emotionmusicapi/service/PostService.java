@@ -191,7 +191,7 @@ public class PostService {
             .collect(Collectors.toSet());
 
         // 기존 태그 중 새로운 태그에 없는 것들은 삭제
-        // filte 로 새로운 태그에 없는 기존 태그만 걸러내어 삭제
+        // filter 로 새로운 태그에 없는 기존 태그만 걸러내어 삭제
         oldEmotionTags.stream()
             .filter(tag -> !newEmotionTags.contains(tag))
             .forEach(post::removeEmotionTag);
