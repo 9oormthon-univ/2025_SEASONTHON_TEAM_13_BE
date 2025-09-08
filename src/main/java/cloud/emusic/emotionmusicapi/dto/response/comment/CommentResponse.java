@@ -1,6 +1,6 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.comment;
 
-import cloud.emusic.emotionmusicapi.domain.Comment;
+import cloud.emusic.emotionmusicapi.domain.comment.Comment;
 import lombok.Getter;
 import java.time.LocalDateTime;
 

@@ -1,4 +1,4 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.song;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

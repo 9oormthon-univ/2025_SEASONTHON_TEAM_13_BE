@@ -1,6 +1,6 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
+import cloud.emusic.emotionmusicapi.dto.response.song.TrackResponse;
 import cloud.emusic.emotionmusicapi.service.SpotifyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

@@ -1,6 +1,6 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
+import cloud.emusic.emotionmusicapi.dto.response.post.PostResponse;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.LikeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,14 +64,14 @@ public class LikeController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "좋아요한 게시글 목록 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = PostResponseDto.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/me/likes")
-    public ResponseEntity<List<PostResponseDto>> getMyLikedPosts(
+    public ResponseEntity<List<PostResponse>> getMyLikedPosts(
             @AuthenticationPrincipal(expression = "id") Long userId
     ) {
         return ResponseEntity.ok(likeService.getLikedPosts(userId));

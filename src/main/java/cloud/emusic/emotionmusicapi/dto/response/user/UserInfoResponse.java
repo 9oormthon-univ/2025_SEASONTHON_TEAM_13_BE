@@ -1,6 +1,6 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.user;
 
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

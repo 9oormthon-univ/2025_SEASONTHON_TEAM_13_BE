@@ -1,6 +1,6 @@
 package cloud.emusic.emotionmusicapi.repository;
 
-import cloud.emusic.emotionmusicapi.domain.PostEmotionTag;
+import cloud.emusic.emotionmusicapi.domain.tag.PostEmotionTag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

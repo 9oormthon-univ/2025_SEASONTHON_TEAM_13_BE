@@ -1,4 +1,4 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.song;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

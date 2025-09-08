@@ -1,6 +1,6 @@
 package cloud.emusic.emotionmusicapi.repository;
 
-import cloud.emusic.emotionmusicapi.domain.DayTag;
+import cloud.emusic.emotionmusicapi.domain.tag.DayTag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

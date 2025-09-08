@@ -1,10 +1,10 @@
 package cloud.emusic.emotionmusicapi.service;
 
-import cloud.emusic.emotionmusicapi.domain.Comment;
-import cloud.emusic.emotionmusicapi.domain.Post;
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.domain.comment.Comment;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import cloud.emusic.emotionmusicapi.dto.request.CommentRequest;
-import cloud.emusic.emotionmusicapi.dto.response.CommentResponse;
+import cloud.emusic.emotionmusicapi.dto.response.comment.CommentResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.CommentRepository;

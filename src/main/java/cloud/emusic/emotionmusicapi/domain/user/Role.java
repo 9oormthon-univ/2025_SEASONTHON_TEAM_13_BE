@@ -1,4 +1,4 @@
-package cloud.emusic.emotionmusicapi.domain;
+package cloud.emusic.emotionmusicapi.domain.user;
 
 
 import lombok.Getter;

@@ -1,10 +1,10 @@
 package cloud.emusic.emotionmusicapi.service;
 
 
-import cloud.emusic.emotionmusicapi.domain.Role;
-import cloud.emusic.emotionmusicapi.domain.User;
-import cloud.emusic.emotionmusicapi.dto.response.KakaoUserResponse;
-import cloud.emusic.emotionmusicapi.dto.response.UserInfoResponse;
+import cloud.emusic.emotionmusicapi.domain.user.Role;
+import cloud.emusic.emotionmusicapi.domain.user.User;
+import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
+import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;

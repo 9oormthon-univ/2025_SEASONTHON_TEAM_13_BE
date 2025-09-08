@@ -1,8 +1,8 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import cloud.emusic.emotionmusicapi.dto.request.CommentRequest;
-import cloud.emusic.emotionmusicapi.dto.response.CommentResponse;
+import cloud.emusic.emotionmusicapi.dto.response.comment.CommentResponse;
 import cloud.emusic.emotionmusicapi.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

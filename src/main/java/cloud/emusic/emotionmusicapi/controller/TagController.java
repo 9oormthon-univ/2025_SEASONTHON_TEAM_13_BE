@@ -1,7 +1,7 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.response.EmotionTrackGroupResponse;
-import cloud.emusic.emotionmusicapi.dto.response.TagRankingResponseWrapper;
+import cloud.emusic.emotionmusicapi.dto.response.tag.EmotionTrackGroupResponse;
+import cloud.emusic.emotionmusicapi.dto.response.tag.TagRankingResponseWrapper;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
