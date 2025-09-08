@@ -1,5 +1,6 @@
-package cloud.emusic.emotionmusicapi.domain;
+package cloud.emusic.emotionmusicapi.domain.post;
 
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 

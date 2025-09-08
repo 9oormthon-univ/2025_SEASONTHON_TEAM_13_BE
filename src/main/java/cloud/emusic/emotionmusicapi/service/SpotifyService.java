@@ -1,8 +1,8 @@
 package cloud.emusic.emotionmusicapi.service;
 
-import cloud.emusic.emotionmusicapi.domain.Song;
+import cloud.emusic.emotionmusicapi.domain.song.Song;
 import cloud.emusic.emotionmusicapi.dto.request.EmotionMapper;
-import cloud.emusic.emotionmusicapi.dto.response.TrackResponse;
+import cloud.emusic.emotionmusicapi.dto.response.song.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.SongRepository;

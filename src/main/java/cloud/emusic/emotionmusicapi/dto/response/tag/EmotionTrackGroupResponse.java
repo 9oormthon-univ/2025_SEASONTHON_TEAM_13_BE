@@ -1,5 +1,6 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.tag;
 
+import cloud.emusic.emotionmusicapi.dto.response.song.TrackUsageResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

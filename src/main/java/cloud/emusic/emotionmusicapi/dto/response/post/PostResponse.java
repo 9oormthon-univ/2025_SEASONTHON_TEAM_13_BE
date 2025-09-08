@@ -1,8 +1,8 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.post;
 
-import cloud.emusic.emotionmusicapi.domain.DayTag;
-import cloud.emusic.emotionmusicapi.domain.Post;
-import cloud.emusic.emotionmusicapi.domain.Song;
+import cloud.emusic.emotionmusicapi.domain.tag.DayTag;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.song.Song;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponseDto {
+public class PostResponse {
     @Schema(description = "게시글 ID", example = "1")
     private Long id;
 
@@ -50,8 +50,8 @@ public class PostResponseDto {
     @Schema(description = "수정일", example = "2025-09-05T14:56:23")
     private LocalDateTime updatedAt;
 
-    public static PostResponseDto from(Post post, Long likeCount, boolean likeState, Long commentCount) {
-        return PostResponseDto.builder()
+    public static PostResponse from(Post post, Long likeCount, boolean likeState, Long commentCount) {
+        return PostResponse.builder()
             .id(post.getId())
             .emotionTags(
                 post.getEmotionTags().stream()

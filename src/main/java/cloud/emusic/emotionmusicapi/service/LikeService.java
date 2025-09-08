@@ -1,9 +1,9 @@
 package cloud.emusic.emotionmusicapi.service;
 
-import cloud.emusic.emotionmusicapi.domain.PostLike;
-import cloud.emusic.emotionmusicapi.domain.Post;
-import cloud.emusic.emotionmusicapi.domain.User;
-import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
+import cloud.emusic.emotionmusicapi.domain.post.PostLike;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.user.User;
+import cloud.emusic.emotionmusicapi.dto.response.post.PostResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.CommentRepository;
@@ -55,7 +55,7 @@ public class LikeService {
         likeRepository.delete(like);
     }
 
-    public List<PostResponseDto> getLikedPosts(Long userId){
+    public List<PostResponse> getLikedPosts(Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -68,7 +68,7 @@ public class LikeService {
                             long likeCount = likeRepository.countByPost(post);
                             long commentCount = commentRepository.countByPost(post);
                             boolean isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), userId);
-                            return PostResponseDto.from(post,likeCount,isLiked,commentCount);
+                            return PostResponse.from(post,likeCount,isLiked,commentCount);
                         })
                 .collect(Collectors.toList());
     }

@@ -1,6 +1,6 @@
-package cloud.emusic.emotionmusicapi.config;
+package cloud.emusic.emotionmusicapi.config.jwt;
 
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

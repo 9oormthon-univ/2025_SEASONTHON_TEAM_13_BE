@@ -1,9 +1,9 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.response.EmotionTagResponse;
+import cloud.emusic.emotionmusicapi.dto.response.tag.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
-import cloud.emusic.emotionmusicapi.dto.response.PostCreateResponse;
-import cloud.emusic.emotionmusicapi.dto.response.PostResponseDto;
+import cloud.emusic.emotionmusicapi.dto.response.post.PostCreateResponse;
+import cloud.emusic.emotionmusicapi.dto.response.post.PostResponse;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,12 +79,12 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = PostResponseDto.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts(
+    public ResponseEntity<List<PostResponse>> getAllPosts(
             @AuthenticationPrincipal(expression = "id") Long userId,
             @Parameter(description = "정렬 기준 (예: createdAt, likeCount)")
             @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -104,14 +104,14 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDto.class))),
+                            schema = @Schema(implementation = PostResponse.class))),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponseDto> getPostById(
+    public ResponseEntity<PostResponse> getPostById(
             @PathVariable Long postId,
             @AuthenticationPrincipal(expression = "id") Long userId){
         return ResponseEntity.ok(postService.getPost(postId,userId));
@@ -121,7 +121,7 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 수정 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDto.class))),
+                            schema = @Schema(implementation = PostResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
@@ -130,7 +130,7 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/{postId}")
-    public ResponseEntity<PostResponseDto> updatePost(
+    public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long postId,
             @RequestBody PostCreateRequest requestDto,
             @AuthenticationPrincipal(expression = "id") Long userId
@@ -161,14 +161,14 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDto.class))),
+                            schema = @Schema(implementation = PostResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/calendar")
-    public ResponseEntity<List<PostResponseDto>> getMyEmotionCalendar(
+    public ResponseEntity<List<PostResponse>> getMyEmotionCalendar(
             @AuthenticationPrincipal(expression = "id") Long userId
     ) {
         return ResponseEntity.ok(postService.getPostCalendar(userId));
@@ -178,7 +178,7 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponseDto.class))),
+                            schema = @Schema(implementation = PostResponse.class))),
             @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
@@ -189,7 +189,7 @@ public class PostController {
             @AuthenticationPrincipal(expression = "id") Long userId,
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate createdDate
     ) {
-        PostResponseDto response = postService.getMyPost(userId, createdDate);
+        PostResponse response = postService.getMyPost(userId, createdDate);
         return ResponseEntity.ok(Objects.requireNonNullElse(response, "null"));
     }
 
@@ -197,12 +197,12 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "검색 성공",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = PostResponseDto.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)))),
             @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/search")
-    public ResponseEntity<List<PostResponseDto>> searchPosts(
+    public ResponseEntity<List<PostResponse>> searchPosts(
             @AuthenticationPrincipal(expression = "id") Long userId,
 
             @Parameter(description = "검색할 감정,하루 태그 (optional)")

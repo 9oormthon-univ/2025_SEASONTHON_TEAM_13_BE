@@ -1,5 +1,9 @@
-package cloud.emusic.emotionmusicapi.domain;
+package cloud.emusic.emotionmusicapi.domain.post;
 
+import cloud.emusic.emotionmusicapi.domain.tag.DayTag;
+import cloud.emusic.emotionmusicapi.domain.tag.PostEmotionTag;
+import cloud.emusic.emotionmusicapi.domain.song.Song;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -54,6 +58,7 @@ public class Post {
         dayTags.add(dayTag);
     }
 
+    // 특정 감정 태그를 이름으로 찾아서 제거
     public void removeEmotionTag(String tagName) {
         this.emotionTags.removeIf(et -> et.getEmotionTag().getName().equals(tagName));
     }

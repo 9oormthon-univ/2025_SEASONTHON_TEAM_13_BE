@@ -1,11 +1,11 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.config.JwtTokenProvider;
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.config.jwt.JwtTokenProvider;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import cloud.emusic.emotionmusicapi.dto.request.LoginRequest;
-import cloud.emusic.emotionmusicapi.dto.response.KakaoTokenResponse;
-import cloud.emusic.emotionmusicapi.dto.response.KakaoUserResponse;
-import cloud.emusic.emotionmusicapi.dto.response.LoginResponse;
+import cloud.emusic.emotionmusicapi.dto.response.login.KakaoTokenResponse;
+import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
+import cloud.emusic.emotionmusicapi.dto.response.login.LoginResponse;
 import cloud.emusic.emotionmusicapi.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

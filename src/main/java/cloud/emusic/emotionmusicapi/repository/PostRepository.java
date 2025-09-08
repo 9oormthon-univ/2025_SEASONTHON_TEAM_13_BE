@@ -1,7 +1,7 @@
 package cloud.emusic.emotionmusicapi.repository;
 
-import cloud.emusic.emotionmusicapi.domain.Post;
-import cloud.emusic.emotionmusicapi.domain.User;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

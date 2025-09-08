@@ -1,4 +1,4 @@
-package cloud.emusic.emotionmusicapi.dto.response;
+package cloud.emusic.emotionmusicapi.dto.response.login;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

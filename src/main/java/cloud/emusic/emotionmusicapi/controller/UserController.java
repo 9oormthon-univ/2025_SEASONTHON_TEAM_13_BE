@@ -1,6 +1,6 @@
 package cloud.emusic.emotionmusicapi.controller;
 
-import cloud.emusic.emotionmusicapi.dto.response.UserInfoResponse;
+import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
 import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
 import cloud.emusic.emotionmusicapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;

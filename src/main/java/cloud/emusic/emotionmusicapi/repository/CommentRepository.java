@@ -1,7 +1,7 @@
 package cloud.emusic.emotionmusicapi.repository;
 
-import cloud.emusic.emotionmusicapi.domain.Comment;
-import cloud.emusic.emotionmusicapi.domain.Post;
+import cloud.emusic.emotionmusicapi.domain.comment.Comment;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

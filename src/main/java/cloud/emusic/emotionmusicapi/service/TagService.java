@@ -1,11 +1,11 @@
 package cloud.emusic.emotionmusicapi.service;
 
-import cloud.emusic.emotionmusicapi.domain.Post;
-import cloud.emusic.emotionmusicapi.domain.Song;
-import cloud.emusic.emotionmusicapi.dto.response.EmotionTrackGroupResponse;
-import cloud.emusic.emotionmusicapi.dto.response.TagRankingResponse;
-import cloud.emusic.emotionmusicapi.dto.response.TagRankingResponseWrapper;
-import cloud.emusic.emotionmusicapi.dto.response.TrackUsageResponse;
+import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.song.Song;
+import cloud.emusic.emotionmusicapi.dto.response.tag.EmotionTrackGroupResponse;
+import cloud.emusic.emotionmusicapi.dto.response.tag.TagRankingResponse;
+import cloud.emusic.emotionmusicapi.dto.response.tag.TagRankingResponseWrapper;
+import cloud.emusic.emotionmusicapi.dto.response.song.TrackUsageResponse;
 import cloud.emusic.emotionmusicapi.repository.DayTagRepository;
 import cloud.emusic.emotionmusicapi.repository.PostEmotionTagRepository;
 import cloud.emusic.emotionmusicapi.repository.PostRepository;

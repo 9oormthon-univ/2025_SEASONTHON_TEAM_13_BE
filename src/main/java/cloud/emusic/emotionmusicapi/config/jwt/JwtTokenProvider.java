@@ -1,6 +1,6 @@
-package cloud.emusic.emotionmusicapi.config;
+package cloud.emusic.emotionmusicapi.config.jwt;
 
-import cloud.emusic.emotionmusicapi.domain.Role;
+import cloud.emusic.emotionmusicapi.domain.user.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
