@@ -18,6 +18,7 @@ public enum ErrorCode {
 
     // 유저
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    USER_BLOCKED(HttpStatus.FORBIDDEN, "차단된 사용자입니다."),
 
     // 감정 태그
     EMOTION_TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "감정 태그를 찾을 수 없습니다."),
