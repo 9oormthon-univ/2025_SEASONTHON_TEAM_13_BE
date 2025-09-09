@@ -26,6 +26,7 @@ public enum ErrorCode {
     // 댓글 (추가된 부분)
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다."),
     COMMENT_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 댓글에 접근할 권한이 없습니다."),
+    COMMENT_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "하루에 작성할 수 있는 댓글 수를 초과했습니다."),
 
     // 좋아요
     ALREADY_LIKED(HttpStatus.BAD_REQUEST, "이미 좋아요를 눌렀습니다."),

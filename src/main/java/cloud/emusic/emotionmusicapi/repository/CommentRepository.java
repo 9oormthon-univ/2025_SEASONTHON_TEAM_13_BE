@@ -2,7 +2,10 @@ package cloud.emusic.emotionmusicapi.repository;
 
 import cloud.emusic.emotionmusicapi.domain.comment.Comment;
 import cloud.emusic.emotionmusicapi.domain.post.Post;
+import cloud.emusic.emotionmusicapi.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
@@ -12,4 +15,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   long countByPost(Post post);
 
   void deleteByPost(Post post);
+
+  long countByUserAndPostIdAndCreatedAtBetween(User user,Long postId, LocalDateTime start, LocalDateTime end);
 }

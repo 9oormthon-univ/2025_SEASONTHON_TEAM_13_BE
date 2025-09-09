@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,16 @@ public class CommentService {
 
   // 댓글 생성
   public CommentResponse createComment(Long postId, CommentRequest request, User user) {
+
+    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+    LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+    long todayCommentCount = commentRepository.countByUserAndPostIdAndCreatedAtBetween(user,postId,startOfDay,endOfDay);
+
+    if (todayCommentCount >= 5) {
+      throw new CustomException(ErrorCode.COMMENT_LIMIT_EXCEEDED);
+    }
+
     Post post = postRepository.findById(postId)
         .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
