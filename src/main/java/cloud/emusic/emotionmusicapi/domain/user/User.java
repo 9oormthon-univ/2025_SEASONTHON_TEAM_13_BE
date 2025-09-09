@@ -39,6 +39,10 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private UserStatus status = UserStatus.ACTIVE;
+
     @Column(name = "profile_image", nullable = false)
     private String profileImage;
 

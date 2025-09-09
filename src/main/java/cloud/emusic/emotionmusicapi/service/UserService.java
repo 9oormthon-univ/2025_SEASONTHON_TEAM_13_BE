@@ -3,6 +3,7 @@ package cloud.emusic.emotionmusicapi.service;
 
 import cloud.emusic.emotionmusicapi.domain.user.Role;
 import cloud.emusic.emotionmusicapi.domain.user.User;
+import cloud.emusic.emotionmusicapi.domain.user.UserStatus;
 import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
 import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
@@ -20,17 +21,24 @@ public class UserService {
 
     @Transactional
     public User processKakaoUser(KakaoUserResponse kakaoUserResponse) {
+
+        String email = kakaoUserResponse.getKakaoAccount().getEmail();
+        String nickname = kakaoUserResponse.getKakaoAccount().getProfile().getNickname();
+        String profileImage = kakaoUserResponse.getKakaoAccount().getProfile().getProfileImageUrl();
+
         // Find user by email, or create a new one if not exists
         return userRepository.findByEmail(kakaoUserResponse.getKakaoAccount().getEmail())
-            .map(user -> user.updateProfile( // If user exists, update their profile
-                kakaoUserResponse.getKakaoAccount().getProfile().getNickname(),
-                kakaoUserResponse.getKakaoAccount().getProfile().getProfileImageUrl()
-            ))
+            .map(user -> {
+                if (user.getStatus() == UserStatus.BLOCKED) {
+                    throw new CustomException(ErrorCode.USER_BLOCKED);
+                }
+                return user.updateProfile(nickname, profileImage);
+            })
             .orElseGet(() -> { // If user does not exist, create and save a new user
                 User newUser = User.builder()
-                    .email(kakaoUserResponse.getKakaoAccount().getEmail())
-                    .nickname(kakaoUserResponse.getKakaoAccount().getProfile().getNickname())
-                    .profileImage(kakaoUserResponse.getKakaoAccount().getProfile().getProfileImageUrl())
+                    .email(email)
+                    .nickname(nickname)
+                    .profileImage(profileImage)
                     .role(Role.USER) // Default role
                     .build();
                 return userRepository.save(newUser);

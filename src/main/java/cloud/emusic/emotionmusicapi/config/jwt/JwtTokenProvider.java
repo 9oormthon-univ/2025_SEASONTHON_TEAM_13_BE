@@ -16,7 +16,7 @@ public class JwtTokenProvider {
     @Value("${JWT_SECRET_KEY}")
     private String secretKeyString;
 
-    private static final long JWT_EXPIRATION_TIME = 1000L * 60 * 60 * 24; // 24 hours
+    private static final long JWT_EXPIRATION_TIME = 1000L * 60 * 60; // 1시간
 
     // Key 객체로 변환한 서명용 비밀 키
     private SecretKey key;
