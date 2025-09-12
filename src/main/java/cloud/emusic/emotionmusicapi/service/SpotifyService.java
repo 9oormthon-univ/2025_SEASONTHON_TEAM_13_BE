@@ -131,9 +131,9 @@ public class SpotifyService {
         }
     }
 
-    public TrackResponse searchTracksByTitle(String keyword) {
+    public List<TrackResponse> searchTracksByTitle(String keyword,int limit) {
 
-        TrackResponse trackResponse = null;
+        List<TrackResponse> results = new ArrayList<>();
 
         String accessToken = getAccessToken();
         HttpHeaders headers = new HttpHeaders();
@@ -144,21 +144,16 @@ public class SpotifyService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         try {
-            String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=track&market=KR&limit=%d&offset=%d", keyword,5, 0);
+            String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=track&market=KR&limit=%d&offset=%d", keyword,limit, 0);
             ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
-            JsonNode items = objectMapper.readTree(searchResponse.getBody()).path("tracks").path("items");
+            JsonNode items = objectMapper.readTree(searchResponse.getBody())
+                    .path("tracks")
+                    .path("items");
 
-            if (items.isArray() && !items.isEmpty()) {
-                JsonNode item = items.get(0);
-
-                String trackId = item.get("id").asText();
+            for (JsonNode item : items) {
                 String name = item.get("name").asText();
-                String artistName = item.path("artists").get(0).get("name").asText();
-                String spotifyUrl = item.path("external_urls").get("spotify").asText();
 
                 JsonNode albumNode = item.path("album");
-                String albumName = albumNode.path("name").asText(null);
-                String releaseDate = albumNode.path("release_date").asText(null);
 
                 String imageUrl = null;
                 JsonNode images = albumNode.path("images");
@@ -166,20 +161,20 @@ public class SpotifyService {
                     imageUrl = images.get(0).get("url").asText();
                 }
 
-                trackResponse = new TrackResponse(
-                        trackId,
+                results.add(new TrackResponse(
+                        item.get("id").asText(),
                         name,
-                        artistName,
-                        spotifyUrl,
+                        item.path("artists").get(0).get("name").asText(),
+                        item.path("external_urls").get("spotify").asText(),
                         imageUrl,
-                        albumName,
-                        releaseDate
-                );
+                        albumNode.path("name").asText(null),
+                        albumNode.path("release_date").asText(null)
+                ));
             }
         } catch (Exception e) {
             throw new RuntimeException("Search API 파싱 실패", e);
         }
-        return trackResponse;
+        return results;
     }
 
     @Transactional
