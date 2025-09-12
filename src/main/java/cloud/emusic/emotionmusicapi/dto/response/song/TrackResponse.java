@@ -8,16 +8,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TrackResponse {
-    private String id;
+    private String trackId;
     private String name;
     private String artist;
     private String spotifyUrl;
     private String imageUrl;
 
-    // ✅ 아래 두 필드를 추가해주세요.
     private String album;
     private String releaseDate;
-
-    private double valence;
-    private double energy;
 }

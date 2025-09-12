@@ -68,7 +68,7 @@ public class PostService {
                 TrackResponse trackInfo = spotifyService.getTrackById(request.getSongTrackId());
 
                 Song newSong = Song.builder()
-                    .trackId(trackInfo.getId())
+                    .trackId(trackInfo.getTrackId())
                     .title(trackInfo.getName())
                     .artist(trackInfo.getArtist())
                     .albumArtUrl(trackInfo.getImageUrl())
@@ -171,7 +171,7 @@ public class PostService {
                 .orElseGet(() -> {
                     TrackResponse trackInfo = spotifyService.getTrackById(request.getSongTrackId());
                     Song newSong = Song.builder()
-                        .trackId(trackInfo.getId())
+                        .trackId(trackInfo.getTrackId())
                         .title(trackInfo.getName())
                         .artist(trackInfo.getArtist())
                         .albumArtUrl(trackInfo.getImageUrl())
