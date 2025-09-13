@@ -65,6 +65,7 @@ jobs:
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
             SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+            LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
 
             EOF
             
