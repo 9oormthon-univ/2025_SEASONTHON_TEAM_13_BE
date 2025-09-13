@@ -37,7 +37,7 @@ public class SpotifyService {
     @Value("${LASTFM_API_KEY}")
     private String lastfmApiKey;
 
-    private static final String LASTFM_API_URL = "http://ws.audioscrobbler.com/2.0/?method=tag.getTopTracks&tag=%s&limit=%d&api_key=%s&format=json";
+    private static final String LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/?method=tag.getTopTracks&tag=%s&limit=%d&api_key=%s&format=json";
 
     private static final String SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
     private static final String SPOTIFY_TRACK_API_URL = "https://api.spotify.com/v1/tracks/";
