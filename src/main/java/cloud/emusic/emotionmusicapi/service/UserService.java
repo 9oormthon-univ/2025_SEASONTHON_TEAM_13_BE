@@ -68,9 +68,9 @@ public class UserService {
         headers.setBasicAuth(spotifyClientId, spotifyClientSecret);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add(("grant_type"), "authorization_code");
-        body.add(("code"), code);
-        body.add(("redirect_uri"), redirect_url);
+        body.add("grant_type", "authorization_code");
+        body.add("code", code);
+        body.add("redirect_uri", redirect_url);
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
