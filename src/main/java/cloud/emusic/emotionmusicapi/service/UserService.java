@@ -5,19 +5,36 @@ import cloud.emusic.emotionmusicapi.domain.user.Role;
 import cloud.emusic.emotionmusicapi.domain.user.User;
 import cloud.emusic.emotionmusicapi.domain.user.UserStatus;
 import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
+import cloud.emusic.emotionmusicapi.dto.response.login.SpotifyTokenResponse;
 import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    @Value("${SPOTIFY_CLIENT_ID}")
+    private String spotifyClientId;
+
+    @Value("${SPOTIFY_CLIENT_SECRET}")
+    private String spotifyClientSecret;
+
+    private static final String SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
+
     private final UserRepository userRepository;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
     public User processKakaoUser(KakaoUserResponse kakaoUserResponse) {
@@ -45,19 +62,19 @@ public class UserService {
             });
     }
 
+    public SpotifyTokenResponse exchangeCodeForToken(String code,String redirect_url){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setBasicAuth(spotifyClientId, spotifyClientSecret);
 
-    @Transactional
-    public void signUp(){
-        //User객체 생성
-        User newUser = User.builder()
-            .email("testing@email.com")
-            .nickname("Tester")
-            .role(Role.USER)
-            .profileImage("default_img_url")
-            .build();
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add(("grant_type"), "authorization_code");
+        body.add(("code"), code);
+        body.add(("redirect_uri"), redirect_url);
 
-        //JPA를 통한 Save
-        userRepository.save(newUser);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        return restTemplate.postForObject(SPOTIFY_ACCESS_TOKEN_URL, request, SpotifyTokenResponse.class);
     }
 
     public UserInfoResponse getUserInfo(Long userId){
