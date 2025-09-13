@@ -53,7 +53,7 @@ public class SpotifyController {
             )
             @RequestParam(defaultValue = "10") int limit
     ) {
-        return ResponseEntity.ok(spotifyService.recommendByEmotions(emotions, limit));
+        return ResponseEntity.ok(spotifyService.searchTracksByEmotion(emotions, limit));
     }
 
     @Operation(

@@ -28,79 +28,78 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpotifyService {
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final SongRepository songRepository;
-
     @Value("${SPOTIFY_CLIENT_ID}")
-    private String clientId;
+    private String spotifyClientId;
 
     @Value("${SPOTIFY_CLIENT_SECRET}")
-    private String clientSecret;
+    private String spotifyClientSecret;
 
-    public List<TrackResponse> recommendByEmotions(List<String> emotions, int limit) {
-        String accessToken = getAccessToken();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+    @Value("${LASTFM_API_KEY}")
+    private String lastfmApiKey;
 
-        List<String> genres = EmotionMapper.getGenres(emotions);
-        String query = genres.stream().map(g -> "genre:" + g).collect(Collectors.joining(" OR "));
-        query = "korean " + query + " year:2015-2025";
+    private static final String LASTFM_API_URL = "http://ws.audioscrobbler.com/2.0/?method=tag.getTopTracks&tag=%s&limit=%d&api_key=%s&format=json";
 
-        List<TrackResponse> allResults = new ArrayList<>();
+    private static final String SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
+    private static final String SPOTIFY_TRACK_API_URL = "https://api.spotify.com/v1/tracks/";
+    private static final String SPOTIFY_LAST_RELEASES_API_URL = "https://api.spotify.com/v1/search?q=%s&type=track&market=KR&limit=1";
+    private static final String SPOTIFY_TITLE_SEARCH_API_URL = "https://api.spotify.com/v1/search?q=%s&type=track&market=KR&limit=%d&offset=%d";
 
-        for (int offset = 0; offset < 200; offset += 50) {
-            String searchUrl = String.format(
-                "https://api.spotify.com/v1/search?q=%s&type=track&limit=50&offset=%d&market=KR",
-                URLEncoder.encode(query, StandardCharsets.UTF_8),
-                offset
-            );
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final SongRepository songRepository;
 
-            ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
+    // 감정 기반 노래 추천
+    public List<TrackResponse> searchTracksByEmotion(List<String> emotions,int limit) {
 
-            try {
-                JsonNode items = objectMapper.readTree(searchResponse.getBody()).path("tracks").path("items");
-                items.forEach(item -> {
-                    String name = item.get("name").asText();
-                    JsonNode albumNode = item.path("album");
-                    String releaseDate = albumNode.path("release_date").asText();
+        List<String> englishEmotion = EmotionMapper.getEnglishEmotions(emotions);
 
-                    if (!name.matches(".*[가-힣0-9].*") || releaseDate.compareTo("2015-01-01") < 0) return;
+        // 고유 태그 추출
+        Map<String, Long> emotionCount = englishEmotion.stream()
+                .collect(Collectors.groupingBy(e -> e, Collectors.counting()));
 
-                    String imageUrl = null;
-                    JsonNode images = albumNode.path("images");
-                    if (images.isArray() && !images.isEmpty()) {
-                        imageUrl = images.get(0).get("url").asText();
+        Map<String, List<TrackResponse>> tagToTracks = new HashMap<>();
+
+        for (Map.Entry<String, Long> entry : emotionCount.entrySet()) {
+            String emotion = entry.getKey();
+
+            List<TrackResponse> tracks = searchTracksByEmotionTag(emotion, limit);
+            tagToTracks.put(emotion, tracks);
+        }
+
+        // 라운드 로빈 + 중복 제거
+        List<TrackResponse> results = new ArrayList<>();
+        Set<String> seenTrackIds = new HashSet<>();
+
+        int maxSize = tagToTracks.values().stream()
+                .mapToInt(List::size)
+                .max()
+                .orElse(0);
+
+        outer:
+        for (int i = 0; i < maxSize; i++) {
+            for (String emotion : tagToTracks.keySet()) {
+                List<TrackResponse> tracks = tagToTracks.get(emotion);
+                if (tracks != null && i < tracks.size()) {
+                    TrackResponse track = tracks.get(i);
+                    if (track.getTrackId() != null && seenTrackIds.add(track.getTrackId())) {
+                        results.add(track);
+
+                        if (results.size() >= limit) {
+                            break outer;
+                        }
                     }
-
-                    allResults.add(new TrackResponse(
-                        item.get("id").asText(),
-                        name,
-                        item.path("artists").get(0).get("name").asText(),
-                        item.path("external_urls").get("spotify").asText(),
-                        imageUrl,
-                        albumNode.path("name").asText(null),
-                        releaseDate
-                    ));
-                });
-            } catch (Exception e) {
-                throw new RuntimeException("Search API 파싱 실패", e);
+                }
             }
         }
-        return allResults.stream().limit(limit).collect(Collectors.toList());
+
+        return results;
     }
 
+    // 트랙 ID로 노래 정보 조회
     public TrackResponse getTrackById(String trackId) {
-        String accessToken = getAccessToken();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        String url = "https://api.spotify.com/v1/tracks/" + trackId;
+        HttpEntity<Void> entity = buildSpotifyHeaders();
+        String url = SPOTIFY_TRACK_API_URL + trackId;
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
@@ -131,20 +130,14 @@ public class SpotifyService {
         }
     }
 
+    // 곡명으로 노래 검색
     public List<TrackResponse> searchTracksByTitle(String keyword,int limit) {
 
+        HttpEntity<Void> entity = buildSpotifyHeaders();
         List<TrackResponse> results = new ArrayList<>();
 
-        String accessToken = getAccessToken();
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.setBearerAuth(accessToken);
-        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
-
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
-
         try {
-            String searchUrl = String.format("https://api.spotify.com/v1/search?q=%s&type=track&market=KR&limit=%d&offset=%d", keyword,limit, 0);
+            String searchUrl = String.format(SPOTIFY_TITLE_SEARCH_API_URL, keyword,limit, 0);
             ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
             JsonNode items = objectMapper.readTree(searchResponse.getBody())
                     .path("tracks")
@@ -179,26 +172,92 @@ public class SpotifyService {
 
     @Transactional
     public void songCountUp(String trackId){
+
         Song song = songRepository.findByTrackId(trackId)
                         .orElseThrow(() -> new CustomException(ErrorCode.SONG_NOT_FOUND));
 
         song.plusPlayCount();
-
         songRepository.save(song);
     }
 
     private String getAccessToken() {
-        String url = "https://accounts.spotify.com/api/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBasicAuth(clientId, clientSecret);
+        headers.setBasicAuth(spotifyClientId, spotifyClientSecret);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, request, Map.class);
+        ResponseEntity<Map> response = restTemplate.exchange(SPOTIFY_ACCESS_TOKEN_URL, HttpMethod.POST, request, Map.class);
         return (String) response.getBody().get("access_token");
+    }
+
+    // 감정 기반 노래 추천 - Spotify에서 노래 검색
+    private List<TrackResponse> searchTracksByEmotionTag(String emotion, int limit) {
+
+        HttpEntity<Void> entity = buildSpotifyHeaders();
+
+        String url = String.format(
+                LASTFM_API_URL,
+                emotion, limit, lastfmApiKey
+        );
+
+        Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+
+        List<Map<String, Object>> tracks = (List<Map<String, Object>>)
+                ((Map<String, Object>) response.get("tracks")).get("track");
+
+        List<TrackResponse> results = tracks.parallelStream()
+                .map(track -> {
+                    String songTitle = (String) track.get("name");
+                    try {
+                        String searchUrl = String.format(
+                                SPOTIFY_LAST_RELEASES_API_URL,
+                                URLEncoder.encode(songTitle, StandardCharsets.UTF_8)
+                        );
+
+                        ResponseEntity<String> searchResponse = restTemplate.exchange(searchUrl, HttpMethod.GET, entity, String.class);
+                        JsonNode items = objectMapper.readTree(searchResponse.getBody())
+                                .path("tracks").path("items");
+
+                        if (items.isArray() && items.size() > 0) {
+                            JsonNode item = items.get(0);
+                            JsonNode albumNode = item.path("album");
+
+                            String imageUrl = null;
+                            JsonNode images = albumNode.path("images");
+                            if (images.isArray() && !images.isEmpty()) {
+                                imageUrl = images.get(0).get("url").asText();
+                            }
+
+                            return new TrackResponse(
+                                    item.get("id").asText(),
+                                    item.get("name").asText(),
+                                    item.path("artists").get(0).get("name").asText(),
+                                    item.path("external_urls").get("spotify").asText(),
+                                    imageUrl,
+                                    albumNode.path("name").asText(null),
+                                    albumNode.path("release_date").asText(null)
+                            );
+                        }
+                    } catch (Exception e) {
+                        log.warn("Spotify 검색 실패: {}", songTitle, e);
+                    }
+                    return null; // 실패 시 null 반환
+                })
+                .filter(Objects::nonNull)
+                .toList();
+        return results;
+    }
+
+    private HttpEntity<Void> buildSpotifyHeaders() {
+        String accessToken = getAccessToken();
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setBearerAuth(accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return new HttpEntity<>(headers);
     }
 }
