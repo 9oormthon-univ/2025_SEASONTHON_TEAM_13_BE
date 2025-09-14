@@ -82,7 +82,8 @@ public class SecurityConfig {
         "https://emusic.cloud",     // 배포 환경
         "https://www.emusic.cloud",
         "https://api.emusic.cloud", // API 서버 도메인
-        "http://localhost:5173"
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
     ));
 
     // 3. 허용할 HTTP 메서드를 지정합니다. (*는 모든 메서드를 의미)
