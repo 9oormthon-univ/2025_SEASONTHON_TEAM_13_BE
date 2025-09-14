@@ -94,9 +94,6 @@ public class LoginController {
     public ResponseEntity<String> spotifyLogin(HttpServletRequest request) {
 
         String scope = "streaming user-read-email user-read-private";
-        String state = UUID.randomUUID().toString(); // CSRF 공격 방지를 위한 상태 토큰 생성
-
-        request.getSession().setAttribute("OAUTH_STATE", state);
 
         String referer = request.getHeader("Referer");
         if (referer == null) {
@@ -110,7 +107,6 @@ public class LoginController {
                 .queryParam("client_id", spotifyClientId)
                 .queryParam("scope", scope)
                 .queryParam("redirect_uri", redirect_url)
-                .queryParam("state", state)
                 .build()
                 .toUriString();
 
@@ -129,16 +125,7 @@ public class LoginController {
     @GetMapping("spotify/authenticate")
     public ResponseEntity<SpotifyTokenResponse> callback(HttpServletRequest request,
                                                          @Parameter(description = "스포티파이에서 발급한 인증 코드", required = true)
-                                                         @RequestParam String code,
-                                                         @Parameter(description = "CSRF 방지를 위한 상태 토큰", required = true)
-                                                         @RequestParam String state) {
-
-        // 세션에서 원래 state 꺼내기
-        String originalState = (String) request.getSession().getAttribute("OAUTH_STATE");
-
-        if (originalState == null || !originalState.equals(state)) {
-            throw new CustomException(ErrorCode.SECURITY_STATE_CSRF);
-        }
+                                                         @RequestParam String code) {
 
         String redirect_url = buildCallbackUrl(request, "/auth/callback");
         SpotifyTokenResponse tokenResponse = userService.exchangeCodeForToken(code,redirect_url);
