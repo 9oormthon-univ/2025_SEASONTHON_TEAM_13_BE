@@ -93,7 +93,7 @@ public class LoginController {
     @GetMapping("spotify/url")
     public ResponseEntity<String> spotifyLogin(HttpServletRequest request) {
 
-        String scope = "streaming user-read-email user-read-private";
+        String scope = "streaming user-read-email user-read-private user-modify-playback-state";
 
         String referer = request.getHeader("Referer");
         if (referer == null) {
