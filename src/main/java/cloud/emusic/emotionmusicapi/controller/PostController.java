@@ -4,7 +4,7 @@ import cloud.emusic.emotionmusicapi.dto.response.tag.EmotionTagResponse;
 import cloud.emusic.emotionmusicapi.dto.request.PostCreateRequest;
 import cloud.emusic.emotionmusicapi.dto.response.post.PostCreateResponse;
 import cloud.emusic.emotionmusicapi.dto.response.post.PostResponse;
-import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
+import cloud.emusic.emotionmusicapi.exception.ApiExceptions;
 import cloud.emusic.emotionmusicapi.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +26,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.*;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
@@ -43,11 +45,9 @@ public class PostController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = EmotionTagResponse.class))
                     )
-            ),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
+    @ApiExceptions(values = {EMOTION_TAGS_NOT_FOUND,INTERNAL_SERVER_ERROR})
     @GetMapping("/emotion-tags")
     public ResponseEntity<List<EmotionTagResponse>> getAllEmotionTag() {
         return ResponseEntity.ok(postService.EmotionTag());
@@ -60,14 +60,9 @@ public class PostController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = PostCreateResponse.class)
                     )
-            ),
-            @ApiResponse(responseCode = "401", description = "인증 실패",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-            ),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
+    @ApiExceptions(values = {UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @PostMapping
     public ResponseEntity<PostCreateResponse> create(
             @Valid @RequestBody PostCreateRequest request,
@@ -79,10 +74,9 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                            array = @ArraySchema(schema = @Schema(implementation = PostResponse.class))))
     })
+    @ApiExceptions(values = {UNAUTHORIZED,POST_NOT_FOUND,INTERNAL_SERVER_ERROR})
     @GetMapping
     public ResponseEntity<List<PostResponse>> getAllPosts(
             @AuthenticationPrincipal(expression = "id") Long userId,
@@ -104,12 +98,9 @@ public class PostController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "게시글 조회 성공",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = PostResponse.class))),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+                            schema = @Schema(implementation = PostResponse.class)))
     })
+    @ApiExceptions(values = {POST_NOT_FOUND,UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostById(
             @PathVariable Long postId,
@@ -122,13 +113,8 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "게시글 수정 성공",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PostResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = {POST_NOT_FOUND,INVALID_PERMISSION,UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @PutMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long postId,
@@ -141,13 +127,8 @@ public class PostController {
     @Operation(summary = "게시글 삭제", description = "게시글 ID를 사용하여 특정 게시글을 삭제합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "게시글 삭제 성공"),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = {POST_NOT_FOUND,UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
@@ -162,11 +143,8 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PostResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = {UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @GetMapping("/calendar")
     public ResponseEntity<List<PostResponse>> getMyEmotionCalendar(
             @AuthenticationPrincipal(expression = "id") Long userId
@@ -179,11 +157,8 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = PostResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = {UNAUTHORIZED,INTERNAL_SERVER_ERROR})
     @GetMapping("/me")
     public ResponseEntity<Object> getMyPost(
             @AuthenticationPrincipal(expression = "id") Long userId,
@@ -198,9 +173,8 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "검색 성공",
                     content = @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = PostResponse.class)))),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = {INTERNAL_SERVER_ERROR})
     @GetMapping("/search")
     public ResponseEntity<List<PostResponse>> searchPosts(
             @AuthenticationPrincipal(expression = "id") Long userId,
