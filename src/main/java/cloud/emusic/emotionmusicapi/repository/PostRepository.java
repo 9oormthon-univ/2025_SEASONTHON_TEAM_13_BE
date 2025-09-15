@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findAllByUser(User user);
+    int countByUserId(Long userId);
 
     @Query("SELECT p FROM Post p WHERE p.user = :user AND p.createdAt >= :start AND p.createdAt < :end")
     Optional<Post> findByUserAndCreatedDate(
@@ -49,5 +50,16 @@ WHERE (:tag IS NULL OR et.emotionTag.name = :tag OR dt.name = :tag)
             @Param("tag") String tag,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT et.name
+        FROM PostEmotionTag pet
+        JOIN pet.emotionTag et
+        JOIN pet.post p
+        WHERE p.user.id = :userId
+        GROUP BY et.name
+        ORDER BY COUNT(pet.id) DESC
+    """)
+    List<String> findTopEmotionTagsByUserId(@Param("userId") Long userId);
 
 }

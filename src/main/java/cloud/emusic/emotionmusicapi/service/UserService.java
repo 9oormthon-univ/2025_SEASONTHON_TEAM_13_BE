@@ -7,8 +7,10 @@ import cloud.emusic.emotionmusicapi.domain.user.UserStatus;
 import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
 import cloud.emusic.emotionmusicapi.dto.response.login.SpotifyTokenResponse;
 import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
+import cloud.emusic.emotionmusicapi.dto.response.user.UserStateResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
+import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class UserService {
     private static final String SPOTIFY_ACCESS_TOKEN_URL = "https://accounts.spotify.com/api/token";
 
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
@@ -81,5 +84,17 @@ public class UserService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return UserInfoResponse.from(user);
+    }
+
+    public UserStateResponse getUserStatus(Long userId){
+
+        int postCount = postRepository.countByUserId(userId);
+
+        String mostUsedEmotion = postRepository.findTopEmotionTagsByUserId(userId)
+                .stream()
+                .findFirst()
+                .orElse("None");
+
+        return UserStateResponse.from(postCount,mostUsedEmotion);
     }
 }
