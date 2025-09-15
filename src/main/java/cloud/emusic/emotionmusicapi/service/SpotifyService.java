@@ -1,10 +1,12 @@
 package cloud.emusic.emotionmusicapi.service;
 
 import cloud.emusic.emotionmusicapi.domain.song.Song;
+import cloud.emusic.emotionmusicapi.domain.tag.EmotionTag;
 import cloud.emusic.emotionmusicapi.dto.request.EmotionMapper;
 import cloud.emusic.emotionmusicapi.dto.response.song.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
+import cloud.emusic.emotionmusicapi.repository.EmotionTagRepository;
 import cloud.emusic.emotionmusicapi.repository.SongRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,8 +50,25 @@ public class SpotifyService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SongRepository songRepository;
 
+    private final EmotionTagRepository emotionTagRepository;
+
     // 감정 기반 노래 추천
     public List<TrackResponse> searchTracksByEmotion(List<String> emotions,int limit) {
+
+        // DB에서 존재하는 감정 태그 목록 조회
+        List<String> validEmotions = emotionTagRepository.findAll()
+                .stream()
+                .map(EmotionTag::getName)
+                .toList();
+
+        // 요청된 감정 중 DB에 없는 태그 필터링
+        List<String> invalidEmotions = emotions.stream()
+                .filter(e -> !validEmotions.contains(e))
+                .toList();
+
+        if (!invalidEmotions.isEmpty()) {
+            throw new CustomException(ErrorCode.EMOTION_TAGS_NOT_FOUND);
+        }
 
         List<String> englishEmotion = EmotionMapper.getEnglishEmotions(emotions);
 
