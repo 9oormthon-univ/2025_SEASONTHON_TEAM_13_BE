@@ -2,7 +2,7 @@ package cloud.emusic.emotionmusicapi.controller;
 
 import cloud.emusic.emotionmusicapi.dto.response.tag.EmotionTrackGroupResponse;
 import cloud.emusic.emotionmusicapi.dto.response.tag.TagRankingResponseWrapper;
-import cloud.emusic.emotionmusicapi.exception.ErrorResponse;
+import cloud.emusic.emotionmusicapi.exception.ApiExceptions;
 import cloud.emusic.emotionmusicapi.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,10 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.INTERNAL_SERVER_ERROR;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/tags")
-@Tag(name = "Tag API", description = "태그 관련 API 문서입니다.")
+@Tag(name = "Tag API", description = "태그 관련 API 문서")
 public class TagController {
 
     private final TagService tagService;
@@ -38,11 +40,9 @@ public class TagController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = TagRankingResponseWrapper.class)
                     )
-            ),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
+    @ApiExceptions(values = INTERNAL_SERVER_ERROR)
     @GetMapping("/ranking")
     public ResponseEntity<TagRankingResponseWrapper> getAllTagRankings() {
         return ResponseEntity.ok(tagService.getTagRankings());
@@ -54,9 +54,8 @@ public class TagController {
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = EmotionTrackGroupResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
+    @ApiExceptions(values = INTERNAL_SERVER_ERROR)
     @GetMapping("/song-rank")
     public ResponseEntity<List<EmotionTrackGroupResponse>> getTracksByEmotion(
             @Parameter(description = "조회할 감정 태그 이름", example = "슬픔,기쁨")

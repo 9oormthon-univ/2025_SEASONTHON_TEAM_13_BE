@@ -7,8 +7,6 @@ import cloud.emusic.emotionmusicapi.dto.response.login.KakaoTokenResponse;
 import cloud.emusic.emotionmusicapi.dto.response.login.KakaoUserResponse;
 import cloud.emusic.emotionmusicapi.dto.response.login.LoginResponse;
 import cloud.emusic.emotionmusicapi.dto.response.login.SpotifyTokenResponse;
-import cloud.emusic.emotionmusicapi.exception.CustomException;
-import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
 import cloud.emusic.emotionmusicapi.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,13 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/login")
 @RequiredArgsConstructor
-@Tag(name = "Login API", description = "소셜 로그인 관련 API")
+@Tag(name = "Login API", description = "소셜 로그인 관련 API 문서")
 public class LoginController {
 
     private final UserService userService;

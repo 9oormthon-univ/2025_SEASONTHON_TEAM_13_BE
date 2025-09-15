@@ -1,6 +1,7 @@
 package cloud.emusic.emotionmusicapi.controller;
 
 import cloud.emusic.emotionmusicapi.dto.response.song.TrackResponse;
+import cloud.emusic.emotionmusicapi.exception.ApiExceptions;
 import cloud.emusic.emotionmusicapi.service.SpotifyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.EMOTION_TAGS_NOT_FOUND;
+import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.INTERNAL_SERVER_ERROR;
+
 @RestController
 @RequestMapping("/songs")
 @RequiredArgsConstructor
+@Tag(name = "Spotify API", description = "Spotify 관련 API 문서")
 public class SpotifyController {
 
     private final SpotifyService spotifyService;
@@ -35,10 +41,9 @@ public class SpotifyController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))
                     )
-            ),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            )
     })
+    @ApiExceptions(values = {EMOTION_TAGS_NOT_FOUND, INTERNAL_SERVER_ERROR})
     @GetMapping("/recommend")
     public ResponseEntity<List<TrackResponse>> recommend(
             @Parameter(
@@ -68,10 +73,9 @@ public class SpotifyController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))
                     )
-            ),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            )
     })
+    @ApiExceptions(values = {INTERNAL_SERVER_ERROR})
     @GetMapping("/search")
     public List<TrackResponse> searchByName(
             @Parameter(description = "검색할 곡명", example = "Blueming")
@@ -90,9 +94,9 @@ public class SpotifyController {
             @ApiResponse(
                     responseCode = "204",
                     description = "게시글 노래 재생 횟수 증가 성공"
-            ),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            )
     })
+    @ApiExceptions(values = {INTERNAL_SERVER_ERROR})
     @PostMapping("/{trackId}/count")
     public ResponseEntity<Void> songCountUp(@PathVariable String trackId){
         spotifyService.songCountUp(trackId);

@@ -46,9 +46,13 @@ public class PostService {
         // DB에 저장된 모든 감정 태그를 조회하여 DTO로 변환 후 반환
         // 조회 리스트를 stream으로 변환하여 map을 통해 EmotionTagResponse로 매핑
         // 최종적으로 toList()를 통해 리스트로 수집하여 반환
-        return emotionTagRepository.findAll().stream()
-            .map(tag -> new EmotionTagResponse(tag.getId(), tag.getName()))
-            .toList();
+        try {
+            return emotionTagRepository.findAll().stream()
+                    .map(tag -> new EmotionTagResponse(tag.getId(), tag.getName()))
+                    .toList();
+        } catch (Exception e) {
+            throw new CustomException(EMOTION_TAGS_NOT_FOUND);
+        }
     }
 
     @Transactional
