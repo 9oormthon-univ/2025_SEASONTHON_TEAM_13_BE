@@ -31,7 +31,7 @@ import static cloud.emusic.emotionmusicapi.exception.dto.ErrorCode.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
-@Tag(name = "Post API", description = "게시글 관련 API")
+@Tag(name = "Post API", description = "게시글 관련 API 문서")
 public class PostController {
 
     private final PostService postService;
