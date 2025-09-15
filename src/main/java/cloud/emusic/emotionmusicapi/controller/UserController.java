@@ -40,7 +40,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserInfo(userId));
     }
 
-    @Operation(summary = "로그인 사용자 작성 게시글 개수,주요 감정 조회", description = "로그인한 사용자의 작성 게시글 개수와 주요 감정을 조회합니다")
+    @Operation(summary = "로그인 사용자 작성 게시글,좋아요 개수,주요 감정 조회", description = "로그인한 사용자의 작성 게시글,좋아요 개수와 주요 감정을 조회합니다")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
                     content = @Content(mediaType = "application/json",

@@ -18,10 +18,14 @@ public class UserStateResponse {
     @Schema(description = "주요 감정", example = "기쁨")
     private String mostUsedEmotion;
 
-    public static UserStateResponse from(int postCount, String mostUsedEmotion) {
+    @Schema(description = "좋아요 개수", example = "10")
+    private int likeCount;
+
+    public static UserStateResponse from(int postCount, String mostUsedEmotion, int likeCount) {
         return UserStateResponse.builder()
                 .postCount(postCount)
                 .mostUsedEmotion(mostUsedEmotion)
+                .likeCount(likeCount)
                 .build();
     }
 }
