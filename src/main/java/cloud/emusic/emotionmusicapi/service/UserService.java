@@ -10,6 +10,7 @@ import cloud.emusic.emotionmusicapi.dto.response.user.UserInfoResponse;
 import cloud.emusic.emotionmusicapi.dto.response.user.UserStateResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.exception.dto.ErrorCode;
+import cloud.emusic.emotionmusicapi.repository.LikeRepository;
 import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -37,6 +38,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final LikeRepository likeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
@@ -89,12 +91,13 @@ public class UserService {
     public UserStateResponse getUserStatus(Long userId){
 
         int postCount = postRepository.countByUserId(userId);
+        int likeCount = likeRepository.countAllLikesByUserId(userId);
 
         String mostUsedEmotion = postRepository.findTopEmotionTagsByUserId(userId)
                 .stream()
                 .findFirst()
                 .orElse("None");
 
-        return UserStateResponse.from(postCount,mostUsedEmotion);
+        return UserStateResponse.from(postCount,mostUsedEmotion,likeCount);
     }
 }
