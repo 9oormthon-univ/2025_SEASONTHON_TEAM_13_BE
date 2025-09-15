@@ -1,5 +1,6 @@
 package cloud.emusic.emotionmusicapi.config;
 
+import cloud.emusic.emotionmusicapi.config.jwt.JwtAuthenticationEntryPoint;
 import cloud.emusic.emotionmusicapi.config.jwt.JwtAuthenticationFilter;
 import cloud.emusic.emotionmusicapi.config.jwt.JwtTokenProvider;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
@@ -28,6 +29,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
   private final JwtTokenProvider jwtTokenProvider;
   private final UserRepository userRepository;
@@ -63,6 +66,7 @@ public class SecurityConfig {
         .securityMatcher("/**")
         .csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(
                     "/login/url", "/login/authenticate",
