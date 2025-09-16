@@ -13,7 +13,7 @@ import cloud.emusic.emotionmusicapi.dto.response.post.PostResponse;
 import cloud.emusic.emotionmusicapi.dto.response.song.TrackResponse;
 import cloud.emusic.emotionmusicapi.exception.CustomException;
 import cloud.emusic.emotionmusicapi.repository.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +42,7 @@ public class PostService {
     private final SongRepository songRepository;
     private final SpotifyService spotifyService;
 
+    @Transactional(readOnly = true)
     public List<EmotionTagResponse> EmotionTag() {
         // DB에 저장된 모든 감정 태그를 조회하여 DTO로 변환 후 반환
         // 조회 리스트를 stream으로 변환하여 map을 통해 EmotionTagResponse로 매핑
@@ -105,6 +106,7 @@ public class PostService {
     }
 
     // 게시글 목록 조회
+    @Transactional(readOnly = true)
     public List<PostResponse> getAllPosts(Long userId, String sortBy, String direction, int page, int size) {
 
         User user = userRepository.findById(userId)
@@ -137,16 +139,12 @@ public class PostService {
 
             // Post 엔티티를 페이지 단위로 조회 후, 각 게시글에 대해 좋아요 수, 댓글 수, 사용자가 좋아요했는지 여부 계산
             return postRepository.findAll(pageable).stream()
-                .map(post -> {
-                    long likeCount = likeRepository.countByPost(post);
-                    long commentCount = commentRepository.countByPost(post);
-                    boolean isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), user.getId());
-                    return PostResponse.from(post, likeCount, isLiked, commentCount);
-                })
+                .map(post -> getPostResponse(post,user))
                 .toList();
         }
     }
 
+    @Transactional(readOnly = true)
     public PostResponse getPost(Long postId, Long userId) {
 
         // 게시글과 유저 엔티티를 ID로 조회하여 존재하지 않으면 예외 발생 있다면 DTO 변환후 반환
@@ -250,6 +248,7 @@ public class PostService {
         postRepository.delete(post);
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponse> getPostCalendar(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
@@ -260,6 +259,7 @@ public class PostService {
             .toList();
     }
 
+    @Transactional(readOnly = true)
     public PostResponse getMyPost (Long userId, LocalDate createdDate) {
 
         // createdDate의 시작과 끝 시각 계산
@@ -275,6 +275,7 @@ public class PostService {
         return post != null ? getPostResponse(post, user) : null;
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponse> searchPostsTag(Long userId, String tag, int page, int size) {
 
         // Pageable 객체 생성, 생성일자 내림차순 정렬
@@ -284,13 +285,11 @@ public class PostService {
         // 감정,하루 태그 모두 포함
         Page<Post> posts = postRepository.searchPostsByTag(tag, pageable);
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
+
         return posts.stream()
-                .map(post -> {
-                    long likeCount = likeRepository.countByPost(post);
-                    long commentCount = commentRepository.countByPost(post);
-                    boolean isLiked = likeRepository.existsByPostIdAndUserId(post.getId(), userId);
-                    return PostResponse.from(post, likeCount, isLiked, commentCount);
-                }).toList();
+                .map(post -> getPostResponse(post,user)).toList();
     }
 
     // 공통 로직 메서드화
