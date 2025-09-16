@@ -37,13 +37,13 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-      -
+
   prometheus:
-      image: prom/prometheus:latest
-      ports:
-        - "9090:9090"
-      volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
 volumes:
   gradle-cache:
