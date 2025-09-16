@@ -30,6 +30,21 @@ services:
     volumes:
       - gradle-cache:/root/.gradle
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      -
+  prometheus:
+      image: prom/prometheus:latest
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   gradle-cache:
 # The commented out section below is an example of how to define a PostgreSQL
