@@ -82,6 +82,7 @@
 - **GitHub Actions** : CI/CD 파이프라인을 통해 자동 빌드·배포, 신속한 배포 및 피드백 사이클 지원
 - **Docker** : 개발 환경과 배포 환경 간 차이를 최소화, 일관된 서비스 실행 보장
 - **Cloudflare** : 도메인 네임 관리, SSL 인증서 제공, CDN 및 **DDoS 방어**를 통한 안정적인 서비스 운영
+- **Spring Boot Actuator + Prometheus + Grafana** : 애플리케이션 상태 및 메트릭 모니터링, 시각화 대시보드를 통한 성능 분석 및 장애 대응
 
 ### Collaboration
 - **Figma** : UI/UX 프로토타이핑 및 디자인 공유
@@ -89,7 +90,7 @@
 - **Discord** : 팀 간 실시간 커뮤니케이션(텍스트/음성/화상), 알림 및 빠른 의사소통 지원
 
 ## 아키텍쳐
-<img width="1169" height="827" alt="이음 프로젝트 아키텍쳐" src="https://github.com/user-attachments/assets/853b17f0-4826-4bf2-b365-dbe658f6d7fc" />
+<img width="1169" height="827" alt="이음 프로젝트 아키텍쳐" src="https://github.com/user-attachments/assets/9de39e62-d7cc-4817-a0d1-15a664e598a0" />
 
 ## 패키지 구조 
 ``` plaintext
