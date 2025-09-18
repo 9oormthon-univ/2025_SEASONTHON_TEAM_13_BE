@@ -40,6 +40,7 @@ public class SecurityConfig {
     return new JwtAuthenticationFilter(jwtTokenProvider,userRepository);
   }
 
+  // Swagger 접근을 위한 시큐리티 설정
   @Bean
   @Order(1)
   public SecurityFilterChain swaggerSecurity(HttpSecurity http) throws Exception {
@@ -59,6 +60,7 @@ public class SecurityConfig {
     return http.build();
   }
 
+  // API 접근을 위한 시큐리티 설정
   @Bean
   @Order(2)
   public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
