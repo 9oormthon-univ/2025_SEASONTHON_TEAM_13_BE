@@ -12,13 +12,12 @@ import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static java.util.Map.Entry.comparingByValue;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class TagService {
     private final DayTagRepository dayTagRepository;
     private final PostRepository postRepository;
 
+    @Transactional(readOnly = true)
     public TagRankingResponseWrapper getTagRankings() {
 
         List<TagRankingResponse> postEmotionTagRankings = postEmotionTagRepository
@@ -45,6 +45,7 @@ public class TagService {
         return wrapper;
     }
 
+    @Transactional(readOnly = true)
     public List<EmotionTrackGroupResponse> getTracksByEmotion(String tagName) {
         List<Post> posts = postRepository.findAllWithTrackAndTags();
 
