@@ -10,9 +10,9 @@ import cloud.emusic.emotionmusicapi.repository.CommentRepository;
 import cloud.emusic.emotionmusicapi.repository.LikeRepository;
 import cloud.emusic.emotionmusicapi.repository.PostRepository;
 import cloud.emusic.emotionmusicapi.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +55,7 @@ public class LikeService {
         likeRepository.delete(like);
     }
 
+    @Transactional(readOnly = true)
     public List<PostResponse> getLikedPosts(Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
