@@ -21,20 +21,14 @@
 
 
 ## 서비스 설명
-<table>
-  <tr>
-    <td><img width="1271" height="712" alt="이음 프로젝트 서비스 1" src="https://github.com/user-attachments/assets/daf1b13c-db64-4a47-b3e5-e58bcebd6e4b" /></td>
-    <td><img width="1271" height="715" alt="이음 프로젝트 서비스 2" src="https://github.com/user-attachments/assets/bff24a3f-b500-4fde-b244-d9e7575e93bb" /></td>
-  </tr>
-  <tr>
-    <td><img width="1272" height="715" alt="이음 프로젝트 서비스 3" src="https://github.com/user-attachments/assets/1a8e528f-442b-4faa-be57-ec07c7696f47" /></td>
-    <td><img width="1277" height="711" alt="이음 프로젝트 서비스 4" src="https://github.com/user-attachments/assets/f7cd4feb-c82f-4b21-bbf4-93be58cfaae3" /></td>
-  </tr>
-</table>
+<img width="1271" height="712" alt="이음 프로젝트 서비스 1" src="https://github.com/user-attachments/assets/daf1b13c-db64-4a47-b3e5-e58bcebd6e4b" />
+<img width="1271" height="715" alt="이음 프로젝트 서비스 2" src="https://github.com/user-attachments/assets/bff24a3f-b500-4fde-b244-d9e7575e93bb" />
+<img width="1272" height="715" alt="이음 프로젝트 서비스 3" src="https://github.com/user-attachments/assets/1a8e528f-442b-4faa-be57-ec07c7696f47" />
+<img width="1277" height="711" alt="이음 프로젝트 서비스 4" src="https://github.com/user-attachments/assets/f7cd4feb-c82f-4b21-bbf4-93be58cfaae3" />
 
 ## 핵심 기능
 
-### 회원가입 / 로그인 (부속)
+### 회원가입 / 로그인
 - 소셜 로그인(Kakao) 간편 회원가입 및 로그인 기능을 제공
 
 ### 나의 감정 / 음악 선택
@@ -46,7 +40,7 @@
     - **감정 기반 음악 추천:** 선택한 감정 태그를 기반으로 노래를 추천합니다
     - **음악 검색 및 등록 :** Spotify API 등을 연동하여 음악을 검색하고 선택합니다
       
-- 목표 : 사용자 자신의 감정과 감정에 어울리는 음악을 함께 기록하고 표현하는 경험을 제공합니다.
+- 목표 : 사용자 자신의 감정과 감정에 어울리는 음악을 함께 기록하고 표현하는 경험을 제공합니다
 
 ### 감정별 음악 피드 (탐색 및 공감)
 - 기능 :
@@ -58,13 +52,13 @@
 
 ### 좋아요 기반 감정 차트 *(소셜 기반 확장 기능)*
 
-- 기능 : 감정 태그별로 등록된 음악 중 ❤️(좋아요)를 많이 받은 곡을 집계하여, 감정별 인기 음악 차트를 제공합니다.
-- 목표 :  단순 스트리밍 수가 아닌, 감정에 기반한 공감(❤️)으로 구성된 차트를 통해 사용자에게 새로운 음악 별견을 돕습니다.
+- 기능 : 감정 태그별로 등록된 음악 중 ❤️(좋아요)를 많이 받은 곡을 집계하여, 감정별 인기 음악 차트를 제공합니다
+- 목표 :  단순 스트리밍 수가 아닌, 감정에 기반한 공감(❤️)으로 구성된 차트를 통해 사용자에게 새로운 음악 별견을 돕습니다
 
 ### 감정 달력 *(개인 감정 회고 기능)*
 
-- 기능 : 사용자가 입력한 감정 태그 및 음악을 달력 형식으로 시각화 하여, 일별 감정 및 음악 기록을 한눈에 볼 수 있도록 시각화 합니다.
-- 목표 : 개인의 감정 흐름을 회고하고 정리할 수 있는 감정 자가관찰 도구를 제공합니다.
+- 기능 : 사용자가 입력한 감정 태그 및 음악을 달력 형식으로 시각화 하여, 일별 감정 및 음악 기록을 한눈에 볼 수 있도록 시각화 합니다
+- 목표 : 개인의 감정 흐름을 회고하고 정리할 수 있는 감정 자가관찰 도구를 제공합니다
 
 ## 기술스택
 ### BackEnd
