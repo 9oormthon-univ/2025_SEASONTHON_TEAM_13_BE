@@ -35,13 +35,10 @@ public class SpotifyController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
-                    description = "추천 곡 목록 반환 성공",
+                    responseCode = "200", description = "추천 곡 목록 반환 성공",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))
-                    )
-            )
+                            array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))))
     })
     @ApiExceptions(values = {EMOTION_TAGS_NOT_FOUND, INTERNAL_SERVER_ERROR})
     @GetMapping("/recommend")
@@ -51,7 +48,6 @@ public class SpotifyController {
                     example = "슬픔,외로움,피곤함"
             )
             @RequestParam List<String> emotions,
-
             @Parameter(
                     description = "추천 곡 개수 (기본값 10)",
                     example = "10"
@@ -62,18 +58,14 @@ public class SpotifyController {
     }
 
     @Operation(
-            summary = "곡명으로 노래 검색",
-            description = "Spotify API를 이용해 곡명으로 노래를 검색합니다."
+            summary = "곡명으로 노래 검색", description = "Spotify API를 이용해 곡명으로 노래를 검색합니다."
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
-                    description = "검색 결과 반환 성공",
+                    responseCode = "200", description = "검색 결과 반환 성공",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))
-                    )
-            )
+                            array = @ArraySchema(schema = @Schema(implementation = TrackResponse.class))))
     })
     @ApiExceptions(values = {INTERNAL_SERVER_ERROR})
     @GetMapping("/search")
@@ -87,13 +79,11 @@ public class SpotifyController {
     }
 
     @Operation(
-            summary = "게시글 노래 재생 횟수 증가",
-            description = "해당 게시글의 노래의 재생 횟수를 증가 합니다"
+            summary = "게시글 노래 재생 횟수 증가", description = "해당 게시글의 노래의 재생 횟수를 증가 합니다"
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "204",
-                    description = "게시글 노래 재생 횟수 증가 성공"
+                    responseCode = "204", description = "게시글 노래 재생 횟수 증가 성공"
             )
     })
     @ApiExceptions(values = {INTERNAL_SERVER_ERROR})
