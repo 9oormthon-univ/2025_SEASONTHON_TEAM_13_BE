@@ -90,7 +90,7 @@
 - **Discord** : 팀 간 실시간 커뮤니케이션(텍스트/음성/화상), 알림 및 빠른 의사소통 지원
 
 ## 아키텍쳐
-<img width="1169" height="827" alt="이음 프로젝트 아키텍쳐" src="https://github.com/user-attachments/assets/9de39e62-d7cc-4817-a0d1-15a664e598a0" />
+<img width="1169" height="827" alt="이음 프로젝트 아키텍쳐" src="https://github.com/user-attachments/assets/fa6522b7-2273-49f2-869e-65d0e1b90e72" />
 
 ## 패키지 구조 
 ``` plaintext
